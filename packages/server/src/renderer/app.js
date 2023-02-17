@@ -15,8 +15,11 @@ var fs = require('fs');
 var express = require('express');
 var app = express();
 
-// app.use(express.static('app'));
-app.use(express.static(__dirname + '/app'));
+var pathHelper = require('path');
+var clientRoot = pathHelper.join(__dirname, '../../../client');
+
+console.log('clientRoot', clientRoot);
+app.use(express.static(clientRoot));
 
 app.listen(80, function(){
   console.log('listening on 80');
@@ -27,7 +30,7 @@ var wss = new WebSocketServer({ port: 8080 });
 var webSock = null;
 
 wss.broadcast = function(data){
-  console.log(":(((((( BROADCAST");
+  console.log("Websocket broadcast");
   wss.clients.forEach(function each(client) {
     client.send(data);
   });
@@ -508,32 +511,25 @@ wss.on('connection', function(ws) {
 
   console.log("Websocket connection established");
 
-  const VISITOR_DIR = '/app/sequences/';
-  const CELEBRITY_DIR = '/app/celeb_seq/';
+  const VISITOR_DIR = '/sequences/';
+  const CELEBRITY_DIR = '/celeb_seq/';
 
-  var files = readDir(__dirname + VISITOR_DIR);
-  var celFiles = readDir(__dirname + CELEBRITY_DIR);
-
-  // var files = readDir('app/sequences/');
-  // var celFiles = readDir('app/celeb_seq/');
+  var files = readDir(clientRoot + VISITOR_DIR);
+  var celFiles = readDir(clientRoot + CELEBRITY_DIR);
 
   if (ws) {
     for (var i = 0; i < files.length; i++) {
       if (files[i].indexOf('.DS_Store') === -1) {
-        var path = files[i].split('renderer/app')[1];
-        console.log("send seq: " + path + "");
+        var path = files[i].split('/client')[1];
+        // console.log("send seq: " + path + "");
         ws.send('seq=' + path);
       }
     }
 
     for (var i = 0; i < celFiles.length; i++) {
-      //var num = fs.readdirSync(celFiles[i]).length;
-      // ws.send('cel=' + celFiles[i].substring(4));
-      // ws.send('cel=' + celFiles[i]);
-
       if (celFiles[i].indexOf('.DS_Store') === -1) {
-        // var path = celFiles[i].replace('/Users/tnordberg/Documents/SMM/Dev/stele/src/renderer/app','');
-        var path = celFiles[i].split('renderer/app')[1];
+        var path = celFiles[i].split('/client')[1];
+        // console.log("send cel: " + path + "");
         ws.send('cel=' + path);
       }
 

@@ -1,0 +1,11 @@
+# We don't include node_modules in our projects
+node_modules
+
+.DS_Store
+
+# Do not track large image sequences
+**/sequences/*/*.jpg
+**/celeb_seq/*/*.jpg
+
+# Do not track other large asset files
+**/assets/*
