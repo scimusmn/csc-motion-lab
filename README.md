@@ -1,4 +1,4 @@
-### Motion Lab - Connecticut Science Center
+# Motion Lab - Connecticut Science Center
 
 ## Packages
 - **arduino** - code to be loaded onto Arduino
