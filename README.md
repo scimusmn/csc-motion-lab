@@ -7,6 +7,7 @@
 - **server** - stripped down custom Stele (Electron) application. Serves client web page, communicates through serial with arduino, and triggers camera captures
 
 ## Installation - development
+- Use `nvm` or a similar tool to set your local Node version to `v12.22.12`
 - `cd packages/server`
 - `yarn`
 - Download entire [Assets folder](https://drive.google.com/drive/folders/1En-x5AFxpYtD-GaVLhCsWP_jjJYA7HNH) from Google Drive
