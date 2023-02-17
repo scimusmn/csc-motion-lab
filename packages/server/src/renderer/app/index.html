@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv='Cache-control' content='no-cache'>
+<link rel='stylesheet' href='style.css' />
+<style type='text/css'>
+
+</style>
+<script src="//unpkg.com/document-register-element"></script> 
+<script src="//unpkg.com/built-in-element"></script>
+<script src='src/vendor/Muse/include.js' main='src/app.js'></script>
+</head>
+
+<body class='findYourVideo' oncontextmenu='return false;'>
+	<h3 style="color: aquamarine;">BUTT</h3>
+	<div class='playback' id='playbackDiv'>
+		<div class='topSection' id='players'>
+			<video-player id='visitorPlayer'>
+				<div class="loadMessage">
+					<div class='en'>Video is loading...</div>
+					<div class='en'>El video se está cargando...</div>
+				</div>
+			</video-player>
+			<div class='sideBySide' id='celebDiv'>
+				<img is='tog-gle' id='playBoth' active='assets/pngs/play-both-circle.png' inactive='assets/pngs/pause-both-circle.png'></img>
+				<video-player id='celebPlayer'>
+					<div class="loadMessage">
+						<div class='en'>Compare your technique with that of an athlete.<br />Choose the action that matches yours from the list on the right.</div>
+						<div class='es'>Compara tu téchnica con la de un atleta.<br /> Escoge del la lista a la derecha la acción que corresponde con la tuya.</div>
+					</div>
+				</video-player>
+			</div>
+		</div>
+		<!-- <img class='justYou' id='visInstruct' src='assets/pngs/justYouInstruct.png'></img> -->
+		<div class='justYou topSection' id='visInstruct'>
+			<div>
+				<span class='numberLabel'>1</span>
+				<span class='textBlock'>
+					<div class='en'>Touch the yellow arrow to watch your video in slow motion.</div>
+					<div class='es'>Toca la flecha amarilla para mirar tu video en cámara lenta.</div>
+				</span>
+			</div>
+			<div>
+				<span class='numberLabel'>2</span>
+				<span class='textBlock'>
+					<div class='en'>Drag the slider to see it frame by frame.</div>
+					<div class='es'>Desliza el deslizador amarillo para verlo cuadro por cuadro.</div>
+				</span>
+			</div>
+			<div>
+				<span class='numberLabel'>3</span>
+				<span class='textBlock'>
+					<div class='en'>Use the side-by-side button to compare<br/> your technique with that of an athlete.</div>
+					<div class='es'>Usa el botón de lado a lado para comparar<br/> tu técnica con la de un atleta.</div>
+				</span>
+			</div>
+		</div>
+		<div id='celebSelect' class='sideBySide topSection'>
+			<thumb-group id='celebThumbs' player='celebPlayer' max='12'></thumb-group>
+			<!-- <sli-der orient='vert' id='celebSlider'></sli-der> -->
+		</div>
+	</div>
+	<div class='select topSection' id='selectDiv'>
+		<div id='recentText'>
+			<div class='en'>Most recent</div>
+			<div class='es'>Más reciente</div>
+		</div>
+		<thumb-group id='thumbs' player='visitorPlayer' max='16'></thumb-group>
+	</div>
+	<div id='mainBar'>
+		<!-- <img id='mainTitle' src='assets/pngs/title.png'></img> -->
+		<div id='title'>
+			<div class='select'>
+				<div class='en'>Find your video</div>
+				<div class='es'>Encuentra tu video</div>
+			</div>
+			<div class='justYou'>
+				<div class='en'>Just you</div>
+				<div class='es'>Sólo tú</div>
+			</div>
+			<div class='sideBySide'>
+				<div class='en'>Side by side</div>
+				<div class='es'>Lado a lado</div>
+			</div>
+		</div>
+		<div id='navButtons' class='playback'>
+			<!-- <img is='but-ton' id='fyv' src='assets/pngs/button1.png'></img>
+			<img is='but-ton' id='jy' class='sideBySide' src='assets/pngs/button2.png'></img>
+			<img is='but-ton' id='sbs' class='justYou' src='assets/pngs/button3.png'></img> -->
+			<div class='navButton' id='fyv'>
+				<div class='en'>Find your video</div>
+				<div class='divider'></div>
+				<div class='es'>Encuentra tu video</div>
+			</div>
+			<div class='navButton' id='jy'>
+				<div class='en'>Just you</div>
+				<div class='divider'></div>
+				<div class='es'>Sólo tú</div>
+			</div>
+			<div class='navButton' id='sbs'>
+				<div class='en'>Side by side</div>
+				<div class='divider'></div>
+				<div class='es'>Lado a lado</div>
+			</div>
+		</div>
+		<div id='navButtons' class='adminMode'>
+			<div class='navButton' id='adminExit'>
+				<div class='en'>Exit Admin Mode</div>
+				<div class='divider'></div>
+				<div class='es'>Modo de Admin</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>

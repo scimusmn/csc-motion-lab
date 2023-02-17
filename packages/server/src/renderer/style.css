@@ -1,0 +1,61 @@
+body {
+  background-color: #222;
+  font-family: sans-serif;
+}
+
+#display {
+  position: fixed;
+  top: 50px;/*calc(50vh - 320px);*/
+  left: calc(50vw - 240px);
+  width:480px;
+  height:640px;
+  border: 3px solid #777;
+}
+
+#predraw {
+  display: none;
+  width:480px;
+  height:640px;
+}
+
+#controls {
+  position: fixed;
+  width:100vw;
+  height: calc(100vh - 690px);
+  top: 690px;
+  text-align: center;
+  color:#fff;
+  margin-top: 10vh;
+}
+
+#controls > div {
+  display: inline-block;
+  margin: 2%;
+}
+
+#start {
+  padding: 10px;
+  background-color: #b00;
+  border-radius: 5px;
+  width: 15%;
+}
+
+#start:active {
+  background-color: #700;
+}
+
+#save {
+  padding: 10px;
+  width: 15%;
+  border-radius: 5px;
+  background-color: #0b0;
+}
+
+#save:active {
+  background-color: #070;
+}
+
+#output {
+  display: block;
+  font-size: 40px;
+}

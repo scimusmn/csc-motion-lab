@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv='Cache-control' content='no-cache'>
+<link rel='stylesheet' href='style.css' />
+<style type='text/css'>
+
+	.text{	color: #aaa;font: 20px arial, sans-serif; border:none;}
+</style>
+<script src='src/vendor/Muse/include.js' main='src/app.js'></script>
+</head>
+
+<body class='main' oncontextmenu='return false;'>
+	<div id='topBar'>
+		<img id='mainTitle' src='assets/pngs/title.png'></img>
+		<div class='playback'>
+			<img is='but-ton' id='fyv' src='assets/pngs/button1.png'></img>
+			<img is='but-ton' id='jy' class='sideBySide' src='assets/pngs/button2.png'></img>
+			<img is='but-ton' id='sbs' class='justYou' src='assets/pngs/button3.png'></img>
+		</div>
+	</div>
+	<div class='playback' id='playbackDiv'>
+		<video-player id='visitorPlayer'></video-player>
+		<img class='justYou' id='visInstruct' src='assets/pngs/justYouInstruct.png'></img>
+		<div class='sideBySide' id='celebDiv'>
+			<img is='tog-gle' id='playBoth' active='assets/pngs/playBoth-active.png' inactive='assets/pngs/pauseBoth.png'></img>
+			<video-player id='celebPlayer'></video-player>
+			<div id='celebSelect'>
+				<thumb-group id='celebThumbs' player='celebPlayer' max='21' scrollable='true'></thumb-group>
+				<sli-der orient='vert' id='celebSlider'></sli-der>
+			</div>
+		</div>
+	</div>
+	<div class='select' id='selectDiv'>
+		<thumb-group id='thumbs' player='visitorPlayer' max='21'></div>
+	</div>
+
+</body>
+</html>

@@ -1,0 +1,27 @@
+# We don't include node_modules in our projects
+node_modules
+
+#
+# Exclude built files
+#
+# Webpack DLL files speed up dev Hot Module Replacement reloads
+dll
+# Production build of the renderer files
+src/dist
+# Production build of the Electron main files
+src/main/main.prod.js
+src/main/main.prod.js.map
+# Production built app binaries and installers
+release
+# Eslint lint command line from package.json generates this cache
+.eslintcache
+
+.DS_Store
+
+# Do not track large image sequences
+**/sequences/*/*.jpg
+**/celeb_seq/*/*.jpg
+
+# Do not track other large asset files
+**/renderer/app/assets/*
+**/renderer/assets/*

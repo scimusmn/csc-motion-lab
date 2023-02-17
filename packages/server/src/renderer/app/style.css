@@ -1,0 +1,455 @@
+@font-face {
+	font-family: sports;
+	src: url('assets/fonts/avenir.ttc');
+}
+
+@font-face {
+  font-family: 'Avenir Next Condensed';
+  src: url('/media/fonts/AvenirNextCondensed.woff') format('woff'),
+  url('/media/fonts/AvenirNextCondensed.ttf') format('truetype');
+  font-style: normal;
+}
+
+.en {
+	color: #fff;
+}
+
+.es {
+	color: rgb(238,97,38);
+}
+
+body {
+	background-image: url("assets/pngs/BG.png");
+	/*background-size: cover;*/
+	background-repeat: no-repeat;
+	width: 100%;
+	height: 100%;
+	cursor: none;
+	-webkit-user-select: none;
+	font-weight: bolder;
+	font-family: 'Avenir Next Condensed', sans-serif;
+	overflow: hidden;
+	pointer-events:visible;
+}
+
+.mainTable {
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+table {
+	width: 100%;
+	height: 100%;
+}
+
+.content-container {
+	width:600px;
+	text-align: center;
+}
+
+#title {
+	position: fixed;
+	font-size: 4vh;
+	line-height: 4vh;
+	left: 4vw;
+	bottom: 5vh;
+}
+
+#navButtons {
+	position: fixed;
+	bottom: -10px;
+	right: 2vw;
+}
+
+.divider {
+	width: calc(12.5vw - 6vh);
+	background-color: rgb(233, 238, 91);
+	height: 2px;
+}
+
+.navButton {
+	display: inline-block;
+	background-color: #3e3e3e;
+	box-sizing: border-box;
+	width: 12.5vw;
+	height: 12vh;
+	margin-left: 1vw;
+	padding: 3vh;
+	padding-top: 2vh;
+	font-size: 1.8vh;
+	line-height: 4vh;
+	text-align: center;
+}
+
+.JustYou #jy, .SideBySide #sbs {
+	position: relative;
+	top: 0px;
+	height: calc(12vh + 10px);
+	/*padding-top: calc(2vh - 10px);*/
+	padding: 2vh;
+	padding-top: 1vh;
+	background-color: #000;
+	box-sizing: border-box;
+	border: 1vh solid rgb(233, 238, 91);
+}
+
+#fyv {
+
+}
+
+#sbs {
+	/*display: none;*/
+}
+
+.topSection {
+	position: absolute;
+	top:0;
+	display: inline-block;
+	height: 81vh;
+	margin-left: 2vw;
+	background-color: rgba(50, 50, 50, 0.5);
+}
+
+#selectDiv {
+	position: relative;
+	top: 0;/*var(--bar-height);*/
+	width:96vw;
+}
+
+#playbackDiv {
+	position: absolute;
+	top: 0;
+}
+
+#players {
+	padding: 2vw;
+	width:auto;
+	box-sizing: border-box;
+}
+
+body.SideBySide #players {
+	width:65vw;
+}
+
+#celebSelect {
+	position: fixed;
+	top:0;
+	right:2vw;
+	width:29vw;
+	overflow-y: hidden;
+	box-sizing: border-box;
+	--control-height: 6.5vh;
+}
+
+/*#playbackDiv > *{
+	position: absolute;
+	top: 5vh;
+}*/
+
+video-player {
+	position: relative;
+	display: inline-block;
+	width: 27vw;
+	text-align: center;
+	padding-top: 5vh;
+	z-index: 1000;
+	/*height: 50vw;*/
+}
+
+video-player .loadMessage{
+	position: absolute;
+	width: 27vw;
+	height: 33.75vw;
+	text-align: center;
+	font-size: 3vh;
+	padding: 5vw;
+	/*padding-top: 10vh;*/
+	z-index: -100;
+	box-sizing: border-box;
+}
+
+canvas[is='flip-book'] {
+	width: 27vw;
+	height:33.75vw;
+	border: 15px solid rgb(233, 238, 91);
+	box-sizing: border-box;
+}
+
+.controls {
+	position: relative;
+	display: inline-block;
+	text-align: center;
+	padding-top: 1vh;
+	width: 27vw;
+}
+
+#visInstruct {
+	left: 35vw;
+	width:57vw;
+	padding-left: 5vw;
+	padding-top: 10vw;
+	box-sizing: border-box;
+}
+
+#visInstruct > div{
+	height: 15vh;
+}
+
+#visInstruct .textBlock{
+	display: inline-block;
+	font-size: 2.5vh;
+	width: 40vw;
+}
+
+#visInstruct .numberLabel{
+	width:5vw;
+	vertical-align: top;
+	display: inline-block;
+	color: rgb(238,97,38);
+	font-size: 5vw;
+	line-height: 4vw;
+}
+
+/*#celebPlayer canvas[is='flip-book'] {
+	background-image: url("assets/pngs/compare-text.png");
+	background-size: contain;
+	background-repeat: no-repeat;
+}*/
+
+.athleteInfo {
+	position: absolute;
+	top:-3vh;
+	left: 0;
+	color: #fff;
+	width: 100%;
+	text-align: center;
+	font-size: 2vh;
+}
+
+.athleteInfo div:first-child {
+	font-size: 3vh;
+}
+
+#celebDiv {
+	position: relative;
+}
+
+.controls img[is='tog-gle'] {
+	margin-right: 1vh;
+	height: 5vh;
+	width: 5vh;
+}
+
+/*controls .slider-handle {
+	height: 5vh;
+	width: 5vh;
+	background:url(assets/pngs/horzScrollLever.png) no-repeat center center;
+	background-size: auto 100%;
+}*/
+
+/*.controls > img:first-child {
+	margin-right: 1vh;
+}*/
+
+sli-der {
+	position:relative;
+	display:inline-block;
+	text-align: left;
+}
+
+sli-der[orient='horiz'] {
+	background:url(assets/pngs/scroll-bed.png) no-repeat center center;
+	background-size: 87% 33%;
+	height: 5vh;
+	width: calc(100% - 1vh - 5vh)
+}
+
+.slider-background{
+	position:relative;
+	display:inline-block;
+	background:url(assets/pngs/scroll-bed.png) no-repeat center center;
+	text-align: left;
+	height: 5vh;
+	width: calc(100% - 5vh)
+}
+
+.sideBySide {
+	display: none;
+}
+
+.sideBySide > * {
+}
+
+#playBoth {
+	/*position: relative;
+	top:-30vh;
+	width: 10vw;*/
+	position: relative;
+	top: 3vh;
+	width:6vw;
+	height: auto;
+}
+
+.slider-handle {
+	height: 5vh;
+	width: 5vh;
+	background:url(assets/pngs/scroll-lever.png) no-repeat center center;
+	background-size: auto 100%;
+}
+
+sli-der[orient='vert'] {
+	background:url(assets/pngs/vertScrollBed.png) no-repeat center center;
+	background-size: 33% 92%;
+	width: 5vh;
+	height: calc(100% - 2vh);
+}
+
+#celebSlider{
+	position:absolute;
+	right: 1vh;
+	top: 1vh;
+}
+
+#celebThumbs {
+	/*position: absolute;
+	top:0;
+	right: 0;*/
+	position: absolute;
+	width: 27vw;
+	height: 65vh;
+	top: 10vh;
+	left: 1vw;
+}
+
+#celebThumbs > thumb-nail {
+	width: 7vw;
+	height: 8.75vw;
+	margin-left: calc(((100% / 3) - 7vw) / 2);
+	margin-right: calc(((100% / 3) - 7vw) / 2);
+	margin-bottom: calc((65vh / 4) - 8.75vw);
+	background-position: 0 -.5vw;
+}
+
+#celebThumbs > thumb-nail.active {
+	border-color: rgb(233, 238, 91);
+}
+
+
+#thumbs {
+	position: absolute;
+	width: 51vw;
+	height: 65vh;
+	top: 10vh;
+	left: 39vw;
+}
+
+#thumbs > thumb-nail {
+	width: 9vw;
+	height: 11.25vw;
+	margin-left: calc(((100% / 5) - 9vw) / 2);
+	margin-right: calc(((100% / 5) - 9vw) / 2);
+	margin-bottom: calc((65vh / 3) - 11.25vw);
+	background-position: 0 -.5vw;
+}
+
+thumb-nail {
+	display: inline-block;
+	text-align: center;
+	border: 5px solid #cccccc;
+	background-size: cover;
+	box-sizing: border-box;
+}
+
+#thumbs thumb-nail:first-child {
+	position: fixed;
+	border: 15px solid rgb(233, 238, 91);
+	top: calc(75vh - 30vw - ((65vh / 3) - 11.25vw));
+	left: 8vw;
+	/*width: auto;*/
+	/*height: auto;*/
+	width: 24vw;
+	height:30vw;
+	margin: 0;
+	background-position: 0 -1.5vw;
+}
+
+
+/*thumb-nail > img {
+	display: inline-block;
+	border: 5px solid #cccccc;
+	width: 9vw;
+	height: calc(33.75vw / 3);
+
+}*/
+
+#recentText{
+	position: fixed;
+	font-size: 3vh;
+	line-height: 3vh;
+	top: 10vh;
+	left: 8vw;
+}
+
+/*#thumbs thumb-nail:first-child::after {
+	display: block;
+	position: absolute;
+	top: 0;
+	width: 90%;
+	left: 5%;
+	z-index: 1000;
+	background-color: yellow;
+	border: 1px solid black;
+	color: black;
+	content: "Most Recent";
+	padding 3px;
+	font-size: 16pt;
+	transform: rotate(-10deg);
+}*/
+
+/*#newest {
+	position: absolute;
+	background-color: yellow;
+	color: black;
+	padding:2px;
+}*/
+
+thumb-nail.thumbSelect > img {
+	border: 5px solid #cccc00;
+}
+
+.thumbnail {
+	border: 5px solid #cccccc;
+}
+
+
+#celebThumbs>div{
+	height: 700px;
+	overflow-y: hidden;
+}
+
+/* classes that control visibility*/
+
+.select, .playback, .justYou, .sideBySide, .adminMode {
+	display: none;
+}
+
+body.findYourVideo .select {
+	display:inline-block;
+}
+
+body.AdminMode .adminMode {
+	display:inline-block;
+}
+
+body:not(.findYourVideo) .playback {
+	display:inline-block;
+}
+
+body.JustYou .justYou {
+	display: inline-block !important;
+}
+
+body.SideBySide .sideBySide {
+	display: inline-block;
+}
