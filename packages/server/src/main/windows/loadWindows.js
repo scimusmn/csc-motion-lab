@@ -96,17 +96,23 @@ function loadWindows(mainWindow, store) {
   //
   // Check if any displays are enabled with content. If so, launch the app with the configured
   // content. If not, then load the Settings page.
-  if (_.find(
-    _.get(store.get('kiosk'), 'displays'),
-    display => display.enabled && display.url !== '',
-  )) {
-    logger.info('Window - Display URLs configured, checking delay');
-    loadWindowDelayCheck(mainWindow, store);
-  } else {
-    store.set('kiosk.browsingContent', 0);
-    logger.info('Window - No content is configured in the store');
-    navigateAppToSettings(mainWindow, store);
-  }
+
+  // Overriding normal Stele behavior for Motion Lab
+  store.set('kiosk.browsingContent', 0);
+  logger.info('Overriding normal Stele behavior for Motion Lab');
+  navigateAppToSettings(mainWindow, store);
+
+  // if (_.find(
+  //   _.get(store.get('kiosk'), 'displays'),
+  //   display => display.enabled && display.url !== '',
+  // )) {
+  //   logger.info('Window - Display URLs configured, checking delay');
+  //   loadWindowDelayCheck(mainWindow, store);
+  // } else {
+  //   store.set('kiosk.browsingContent', 0);
+  //   logger.info('Window - No content is configured in the store');
+  //   navigateAppToSettings(mainWindow, store);
+  // }
 }
 
 export { loadWindows, loadWindowNow };
