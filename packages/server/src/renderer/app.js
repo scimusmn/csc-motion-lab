@@ -15,6 +15,8 @@ var fs = require('fs');
 var express = require('express');
 var app = express();
 
+var { exec } = require('child_process');
+
 var pathHelper = require('path');
 var clientRoot = pathHelper.join(__dirname, '../../../client');
 
@@ -311,6 +313,20 @@ window.save = (dir,saveOther) => {
   // });
 };
 
+var startCameraCapture = function(path) {
+  exec("say starting camera capture - " + path, (error, stdout, stderr) => {
+    if (error) {
+        console.log(`error: ${error.message}`);
+        return;
+    }
+    if (stderr) {
+        console.log(`stderr: ${stderr}`);
+        return;
+    }
+    console.log(`stdout: ${stdout}`);
+});
+};
+
 var countdown = (count) => {
   // pollLight.setStage(count);
 
@@ -321,7 +337,8 @@ var countdown = (count) => {
       audio[count].play();
     }
     setTimeout(() => { countdown(count - 1); }, 1000);
-    if(count == 1 ) cam.capture();
+    // if(count == 1 ) cam.capture(); // old camera methodology
+    if(count == 1 ) startCameraCapture('test directory');
     else if(count == 5) getReady.play();
   } else {
     output.textContent = 'Recording...';
@@ -381,6 +398,9 @@ var saveBut = document.querySelector('#save');
 
 saveBut.onclick = (e)=>{
   console.log("saveBut.onclick");
+  // Temp
+  startCameraCapture('test directory.');
+
   save(document.querySelector('#folder').value,true);
 }
 
