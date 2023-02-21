@@ -25,3 +25,5 @@ release
 # Do not track other large asset files
 **/renderer/app/assets/*
 **/renderer/assets/*
+
+!**/assets/.gitkeep

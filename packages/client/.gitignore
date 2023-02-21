@@ -9,3 +9,5 @@ node_modules
 
 # Do not track other large asset files
 **/assets/*
+
+!**/assets/.gitkeep
