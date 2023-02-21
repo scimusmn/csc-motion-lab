@@ -18,7 +18,6 @@ include([], function() {
       //grabs the middle image from the set for the thumbnail image.
       _this.setImage = ()=> {
         var jpgPath = "url('" + _this.setName + '/400.jpg?' + Math.random() + "')";
-        console.log('--setImage', jpgPath);
         _this.style.backgroundImage = jpgPath;
       };
     };
@@ -154,7 +153,7 @@ include([], function() {
         if (µ('[setName="' + setName + '"]') && µ('[setName="' + setName + '"]').length) {
           //tell the thumbnails to refresh the image, and pop the thumbnail element
           set = µ('[setName="' + setName + '"]')[0];
-          console.log(setName + ' is the set name');
+          // console.log(setName + ' is the set name');
           set.setAttribute('setName', setName);
           set.refreshSet();
           _this.removeChild(set);

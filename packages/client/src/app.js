@@ -46,7 +46,7 @@ include(incs, () => {
 
   //when we receive a message from the server
   window.webSockClient.onMessage = (evt) => {
-    console.log('window.webSockClient.onMessage', evt.data);
+    console.log('onMessage:', evt.data);
     switch (evt.data.split('=')[0]){
       //if it's calling out the address of a folder, handle it with the proper group
       case 'seq':

@@ -123,7 +123,7 @@ app.on('ready', async () => {
 
   // Setup ability to pass through serial data
   // to/from renderer process and serial ports.
-  serialRelay(logger);
+  // serialRelay(logger); // - Disabled to avoid serial port conflicts - tn 2023
 });
 
 // Quit the app if all windows are closed

@@ -1,6 +1,12 @@
+/* eslint-disable */
+
 "use strict";
 
-var com = require('serialport');
+// var com = require('serialport');
+const SerialPort = require('serialport');
+
+console.log('SerialPort imported:');
+console.dir(SerialPort);
 
 var serial = function() {
   let bufSize = 512;
@@ -18,10 +24,13 @@ var serial = function() {
   };
 
   _this.open = (name, fxn) => {
-    console.log(name);
+    console.log('arduino.js - open:', name);
     if (name[0] != '/')
-      com.list(function(err, ports) {
+      SerialPort.list(function(err, ports) {
+        console.log('arduino.js - open - SerialPort.list:', ports);
         ports.forEach(function(port) {
+          // TODO: we could auto-detect via manufacturer name here instead of 
+          // requiring specific port comName - tn, 2023
           if (port.comName.indexOf(name) > -1) {
             name = port.comName;
             _this.openByName(name, fxn);
@@ -35,9 +44,22 @@ var serial = function() {
   _this.openByName = (portName, fxn) => {
     if (fxn) _this.onMessage = fxn;
     console.log('Opening serialport ' + portName);
-    ser = new com.SerialPort(portName, {
+    console.log('SerialPort');
+    console.dir(SerialPort);
+    // ser = new com.SerialPort(portName, {
+    //   baudRate: 115200,
+    //   parser: com.parsers.readline('\r\n', 'binary'), 
+    //   buffersize:64*1024,
+    // });
+
+    // updated to work with latest serialport - tn, 2023
+    ser = new SerialPort({
+      path: portName,
       baudRate: 115200,
-      parser: com.parsers.readline('\r\n', 'binary'),
+      dataBits: 8,
+      stopBits: 1,
+      parity: 'none',
+      parser: new SerialPort.parsers.Readline('\r\n', 'binary'),
       buffersize:64*1024,
     });
 
@@ -192,15 +214,18 @@ var Arduino = function() {
   };
 
   this.digitalWrite = function(pin, state) {
+    if (!_this.isOpen) return;
     if (pin <= 15) sp.send([START + DIGI_WRITE + ((pin & 15) << 1) + (state & 1)]);
     else console.log('Pin must be less than or equal to 15');
   };
 
   this.digitalRead = function(pin) {
+    if (!_this.isOpen) return;
     sp.send([START + DIGI_READ + (pin & 31)]);
   };
 
   this.analogWrite = function(pin, val) {
+    if (!_this.isOpen) return;
     if (val >= 0 && val < 256)
       sp.send([START + ANA_WRITE + ((pin & 7) << 1) + (val >> 7), val & 127]);
   };
@@ -251,8 +276,7 @@ var Arduino = function() {
   };
 
   this.connect = function(portname, fxn) {
-    //onSerialOpen = fxn;
-    //openSerial(portname, _this.onMessage);
+    console.log("arduino.js connect");
     exports.serial.onConnect = fxn;
     exports.serial.open(portname, _this.onMessage);
   };
