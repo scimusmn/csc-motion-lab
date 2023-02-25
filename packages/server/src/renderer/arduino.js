@@ -25,27 +25,26 @@ var serial = function() {
 
   _this.open = (name, fxn) => {
     console.log('arduino.js - open:', name);
-    if (name[0] != '/')
       SerialPort.list(function(err, ports) {
-        console.log('arduino.js - open - SerialPort.list:', ports);
+        console.log('arduino.js - open - finding Arduino...');
         ports.forEach(function(port) {
-          // TODO: we could auto-detect via manufacturer name here instead of 
+          // Auto-detect via manufacturer name here instead of 
           // requiring specific port comName - tn, 2023
-          if (port.comName.indexOf(name) > -1) {
+          /// e.g., manufacturer: "Arduino (www.arduino.cc)", 
+          var man = port.manufacturer;
+          if (man && man.toLowerCase().indexOf('arduino') > -1) {
+            console.log("Arduino found!");
+            console.log(port);
             name = port.comName;
             _this.openByName(name, fxn);
           }
         });
       });
-
-    else _this.openByName(name, fxn);
   };
 
   _this.openByName = (portName, fxn) => {
     if (fxn) _this.onMessage = fxn;
     console.log('Opening serialport ' + portName);
-    console.log('SerialPort');
-    console.dir(SerialPort);
     // ser = new com.SerialPort(portName, {
     //   baudRate: 115200,
     //   parser: com.parsers.readline('\r\n', 'binary'), 
@@ -53,8 +52,7 @@ var serial = function() {
     // });
 
     // updated to work with latest serialport - tn, 2023
-    ser = new SerialPort({
-      path: portName,
+    ser = new SerialPort(portName, {
       baudRate: 115200,
       dataBits: 8,
       stopBits: 1,
@@ -72,8 +70,9 @@ var serial = function() {
 
     });
 
-    ser.on('error', function() {
+    ser.on('error', function(err) {
       console.log('Error from SerialPort');
+      console.log(err);
       sp = null;
     });
   };

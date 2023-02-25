@@ -14,7 +14,7 @@ var fs = require('fs');
 var express = require('express');
 var app = express();
 
-var { exec } = require('child_process');
+var { exec, execSync } = require('child_process');
 
 var pathHelper = require('path');
 var clientRoot = pathHelper.join(__dirname, '../../../client');
@@ -83,8 +83,11 @@ var output = document.querySelector('#output');
 ////////////////////////////////////////////////////////////////////////
 
 var startCameraCapture = function(path) {
+
   // var cmd = '../camera/camera.bat ' + path;
   var cmd = 'bash ../camera/temp.sh ';
+  // TODO: refactor to use: cfg.pathToCamera
+
   exec(cmd, (error, stdout, stderr) => {
     if (error) {
         console.log(`error: ${error.message}`);
@@ -263,16 +266,14 @@ var deleteFolderRecursive = function(path) {
 window.save = (dir, saveOther) => {
   console.log('window.save saving to ' + dir, saveOther);
 
-  // TODO: Do we need to delete the folder here, or can we assume
-  // the camera script has already taken care of that?
-
-  // if (fs.existsSync(dir)) deleteFolderRecursive(dir);
-  // fs.mkdirSync(dir);
+  // We delete the folder here, and recreate it as an empty folder.
+  // The camera script will not work unless the folder is already empty.
+  if (fs.existsSync(dir)) deleteFolderRecursive(dir);
+  fs.mkdirSync(dir);
+  console.log('Folder is empty: ' + dir);
 
   output.textContent = 'Saving...';
   
-  const TIME_TO_SAVE_IMAGES = 10 * 1000;
-
   setTimeout(() => {
     console.log("Images should be saved by now. Sending out broadcast to clients...");
     output.textContent = 'Done Saving.';
@@ -286,7 +287,7 @@ window.save = (dir, saveOther) => {
     console.log('saved to ' + dir);
     waitForSave = false;
     
-  }, TIME_TO_SAVE_IMAGES);
+  }, cfg.fileSaveDelay);
 };
 
 var countdown = (count) => {
@@ -519,7 +520,12 @@ wss.on('connection', function(ws) {
     switch (message.split('=')[0]){
       case 'del':
         console.log('deleting folder ' + message.split('=')[1]);
-        deleteFolderRecursive('app/' + message.split('=')[1] + '/');
+        // incoming path example: '/sequences/temp15'
+        // TODO: Need to check that pathing still works when coming from client
+        // var files = readDir(clientRoot + VISITOR_DIR);
+        var delPath = clientRoot + message.split('=')[1] + '/';
+        console.log('delPath: ' + delPath);
+        deleteFolderRecursive(delPath);
         wss.broadcast('reload');
         //
         break;
