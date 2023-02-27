@@ -86,7 +86,7 @@ var startCameraCapture = function(saveDir) {
 
   var executablePath = cfg.pathToCamera;
 
-  console.log('startCameraCapture - executablePath: ' + cmd);
+  console.log('startCameraCapture - executablePath: ' + executablePath);
   console.log('startCameraCapture - saveDir: ' + saveDir);
 
   const cameraProgram = execFile(executablePath, [saveDir], (error, stdout, stderr) => {
@@ -331,6 +331,8 @@ window.save = (dir, saveOther) => {
 var countdown = (count) => {
   pollLight.setStage(count);
 
+  var dir = '';
+
   if (count > 0) {
     output.textContent = count;
     if(count<4){
@@ -338,7 +340,12 @@ var countdown = (count) => {
       audio[count].play();
     }
     setTimeout(() => { countdown(count - 1); }, 1000);
-    if(count == 1 ) startCameraCapture('test directory');
+    
+    if(count == 1 ) {
+      dir = clientRoot + VISITOR_DIR + 'temp' + dirNum;
+      console.log('Will save sequence to ' + dir);
+      startCameraCapture(dir);
+    }
     else if(count == 5) getReady.play();
   } else {
     output.textContent = 'Recording...';
@@ -356,7 +363,8 @@ var countdown = (count) => {
       pollLight.setRed();
       console.log('done capturing');
       // var dir = './app/sequences/temp' + dirNum++;
-      var dir = clientRoot + VISITOR_DIR + 'temp' + dirNum++;
+      // var dir = clientRoot + VISITOR_DIR + 'temp' + dirNum++;
+      var savedDir = clientRoot + VISITOR_DIR + 'temp' + dirNum++;
       console.log('visitor save dir: ' + dir);
       if(dirNum>=cfg.setsToStore) dirNum = 0;
       greenExitLight(1);
@@ -366,7 +374,7 @@ var countdown = (count) => {
       },500)
       clearInterval(redInt);
       redExitLight(0);
-      save(dir);
+      save(savedDir);
     }, cfg.recordTime);
   }
 };
