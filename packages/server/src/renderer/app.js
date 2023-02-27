@@ -179,27 +179,37 @@ window.showPracticeAudio = (fxn) => {
 // ###### Aliases for controlling the lights via arduino. ########### //
 ////////////////////////////////////////////////////////////////////////
 
+const PIN_GREEN_EXIT_LIGHT = 3;
+const PIN_RED_EXIT_LIGHT = 4;
+
+const PIN_GREEN_ENTRANCE_LIGHT = 5;
+const PIN_RED_ENTRANCE_LIGHT = 6;
+
 var greenExitLight = (state) => {
-  arduino.digitalWrite(3, state);
+  arduino.digitalWrite(PIN_GREEN_EXIT_LIGHT, state);
 };
 
 var redExitLight = (state) => {
-  arduino.digitalWrite(4, state);
+  arduino.digitalWrite(PIN_RED_EXIT_LIGHT, state);
 };
 
 var greenEntranceLight = (state) => {
-  arduino.digitalWrite(5, state);
+  arduino.digitalWrite(PIN_GREEN_ENTRANCE_LIGHT, state);
 };
 
 var redEntranceLight = (state) => {
-  arduino.digitalWrite(6, state);
+  arduino.digitalWrite(PIN_RED_ENTRANCE_LIGHT, state);
   if (state) loopPractice();
 };
+
+const PINS_POLL_LIGHTS = [7,8,9,10,15];
+const PIN_POLL_LIGHT_GREEN = 8;
+const PIN_POLL_LIGHT_RED = 7;
 
 var pollLight = new function(){
   var cInt = null;
 
-  var pole = [7,8,9,10,15];
+  // var pole = [7,8,9,10,15];
   var cArr = [[0,1,1,1,1],
               [0,0,1,1,1],
               [0,0,0,1,1],
@@ -211,30 +221,30 @@ var pollLight = new function(){
   var cCount = 0;
 
   this.setGreen = function(){
-    for(let i=0; i<5; i++){
-      arduino.digitalWrite(pole[i], 0);
+    for(let i=0; i<PINS_POLL_LIGHTS.length; i++){
+      arduino.digitalWrite(PIN_POLL_LIGHTS[i], 0);
     }
-    arduino.digitalWrite(8, 1);
+    arduino.digitalWrite(PIN_POLL_LIGHT_GREEN, 1);
   };
 
   this.setRed = function(){
-    for(let i=0; i<5; i++){
-      arduino.digitalWrite(pole[i],0);
+    for(let i=0; i<PINS_POLL_LIGHTS.length; i++){
+      arduino.digitalWrite(PINS_POLL_LIGHTS[i],0);
     }
-    arduino.digitalWrite(7, 1);
+    arduino.digitalWrite(PIN_POLL_LIGHT_RED, 1);
   };
 
   this.setStage = function(count){
-    for(let i=0; i<5; i++){
-      arduino.digitalWrite(pole[i], cArr[count][i]);
+    for(let i=0; i<PINS_POLL_LIGHTS.length; i++){
+      arduino.digitalWrite(PINS_POLL_LIGHTS[i], cArr[count][i]);
     }
   };
 
   this.blink = function () {
     cCount = 1;
     cInt = setInterval(()=>{
-      for(let i=1; i<5; i++){
-        arduino.digitalWrite(pole[i], ((cCount)?1:0));
+      for(let i=1; i<PINS_POLL_LIGHTS.length; i++){
+        arduino.digitalWrite(PINS_POLL_LIGHTS[i], ((cCount)?1:0));
       }
       cCount=!cCount;
     },250);
@@ -398,7 +408,7 @@ var cageReset = ()=>{
 }
 
 /////////////////////////////////////////////////////////////////////////////
-//####################### Arduino Declarartions #############################
+//####################### Arduino Declarations #############################
 /////////////////////////////////////////////////////////////////////////////
 
 var ardTimeout = null;
@@ -520,9 +530,6 @@ wss.on('connection', function(ws) {
     switch (message.split('=')[0]){
       case 'del':
         console.log('deleting folder ' + message.split('=')[1]);
-        // incoming path example: '/sequences/temp15'
-        // TODO: Need to check that pathing still works when coming from client
-        // var files = readDir(clientRoot + VISITOR_DIR);
         var delPath = clientRoot + message.split('=')[1] + '/';
         console.log('delPath: ' + delPath);
         deleteFolderRecursive(delPath);
