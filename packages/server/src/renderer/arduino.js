@@ -23,10 +23,11 @@ var serial = function() {
     if (_this.isOpen) ser.write(new Buffer(arr));
   };
 
-  _this.open = (name, fxn) => {
-    console.log('arduino.js - open:', name);
+  _this.open = (fxn) => {
+    console.log('arduino.js - open:');
       SerialPort.list(function(err, ports) {
         console.log('arduino.js - open - finding Arduino...');
+        var name = '';
         ports.forEach(function(port) {
           // Auto-detect via manufacturer name here instead of 
           // requiring specific port comName - tn, 2023
@@ -39,19 +40,18 @@ var serial = function() {
             _this.openByName(name, fxn);
           }
         });
+        if (name === '') {
+          console.log('[WARNING] Arduino was not found on any of the following ports:');
+          console.dir(ports);
+        }
       });
   };
 
   _this.openByName = (portName, fxn) => {
     if (fxn) _this.onMessage = fxn;
     console.log('Opening serialport ' + portName);
-    // ser = new com.SerialPort(portName, {
-    //   baudRate: 115200,
-    //   parser: com.parsers.readline('\r\n', 'binary'), 
-    //   buffersize:64*1024,
-    // });
 
-    // updated to work with latest serialport - tn, 2023
+    // Updated to work with latest serialport - tn, 2023
     ser = new SerialPort(portName, {
       baudRate: 115200,
       dataBits: 8,
@@ -274,10 +274,10 @@ var Arduino = function() {
     this.onReady();
   };
 
-  this.connect = function(portname, fxn) {
+  this.connect = function(fxn) {
     console.log("arduino.js connect");
     exports.serial.onConnect = fxn;
-    exports.serial.open(portname, _this.onMessage);
+    exports.serial.open(_this.onMessage);
   };
 
   this.createdCallback = function() {

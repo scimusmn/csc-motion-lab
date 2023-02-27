@@ -139,20 +139,25 @@ for (var i = 0; i < 4; i++) {
 // ############### Practice Cage brightsign triggers ###################
 ////////////////////////////////////////////////////////////////////////
 
+// TODO: Clarify the difference between these two pins.
+// Does one control the BrightSign video (13) and the other control the practice cage light (12)?
+const PIN_BRIGHTSIGN_PRACTICE = 13;
+const PIN_BRIGHTSIGN_GO = 12;  
+
 window.loopPractice = () => {
-  arduino.digitalWrite(13, 0);
+  arduino.digitalWrite(PIN_BRIGHTSIGN_PRACTICE, 0);
   console.log('Loop practice');
   setTimeout(() => {
-    arduino.digitalWrite(13, 1);
+    arduino.digitalWrite(PIN_BRIGHTSIGN_PRACTICE, 1);
   }, 100);
 };
 
 window.showGo = () => {
-  arduino.digitalWrite(12, 0);
+  arduino.digitalWrite(PIN_BRIGHTSIGN_GO, 0);
   console.log('Show go');
   goShown = true;
   setTimeout(() => {
-    arduino.digitalWrite(12, 1);
+    arduino.digitalWrite(PIN_BRIGHTSIGN_GO, 1);
     setTimeout(() => {
       goShown = false;
       //loopPractice();
@@ -161,12 +166,12 @@ window.showGo = () => {
 };
 
 window.showPracticeAudio = (fxn) => {
-  arduino.digitalWrite(13, 0);
+  arduino.digitalWrite(PIN_BRIGHTSIGN_PRACTICE, 0);
   console.log("practice audio");
   audioPracticePlaying = true;
   //resetIdleTimeout();
   setTimeout(() => {
-    arduino.digitalWrite(13, 1);
+    arduino.digitalWrite(PIN_BRIGHTSIGN_PRACTICE, 1);
     goTimeout = setTimeout(() => {
       audioPracticePlaying = false;
       showGo();
@@ -413,6 +418,10 @@ var cageReset = ()=>{
 
 var ardTimeout = null;
 
+const PIN_START_COUNTDOWN_BTN = 2;
+const PIN_EXIT_CAGE_SENSOR = 14;
+const PIN_PRACTICE_CAGE_SENSOR = 16;
+
 var resetArduinoHeartbeat = (time)=>{
   if(ardTimeout) clearTimeout(ardTimeout);
   ardTimeout = setTimeout(()=>{
@@ -425,25 +434,26 @@ resetArduinoHeartbeat(60000);
 
 var heartbeatInt = null;
 
-arduino.connect(cfg.portName, function() {
+arduino.connect(function() {
   console.log('app.js - Connecting to Arduino...');
   //pollLight.setStage(4);
 
-  arduino.watchPin(2, window.startCntdn);
+  arduino.watchPin(PIN_START_COUNTDOWN_BTN, window.startCntdn);
 
-  arduino.watchPin(14, function(pin, state) {
+  arduino.watchPin(PIN_EXIT_CAGE_SENSOR, function(pin, state) {
     //console.log(state + " is the current state on "+ pin);
     if (state) {
+      console.log('[PIN_EXIT_CAGE_SENSOR] pin', PIN_EXIT_CAGE_SENSOR, 'is high. Resetting cage.');
       setTimeout(cageReset,1000);
     }
   });
 
-  arduino.watchPin(16, function(pin, state) {
+  arduino.watchPin(PIN_PRACTICE_CAGE_SENSOR, function(pin, state) {
     if (!state) {
       console.log('practice cage occupied');
       if(!audioPracticePlaying){
         if(timeoutFlag){
-          console.log('show practive with audio');
+          console.log('show practice with audio');
           showPracticeAudio(admitNext);
         } else if(!cageOccupied && !goShown){
           admitNext();
@@ -452,7 +462,7 @@ arduino.connect(cfg.portName, function() {
     }
   });
 
-  arduino.analogReport(5,500,(pin,val)=>{
+  arduino.analogReport(PIN_GREEN_ENTRANCE_LIGHT,500,(pin,val)=>{
     console.log('Heartbeat');
     resetArduinoHeartbeat(10000);
   });
