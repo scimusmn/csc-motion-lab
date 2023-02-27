@@ -14,7 +14,7 @@ var fs = require('fs');
 var express = require('express');
 var app = express();
 
-var { exec, execSync } = require('child_process');
+var { exec, execFile } = require('child_process');
 
 var pathHelper = require('path');
 var clientRoot = pathHelper.join(__dirname, '../../../client');
@@ -82,28 +82,51 @@ var output = document.querySelector('#output');
 // ################### Create camera and initialize ################# //
 ////////////////////////////////////////////////////////////////////////
 
-var startCameraCapture = function(path) {
+var startCameraCapture = function(saveDir) {
 
-  // var cmd = '../camera/camera.bat ' + path;
-  var cmd = 'bash ../camera/temp.sh ';
-  // TODO: refactor to use: cfg.pathToCamera
+  var executablePath = cfg.pathToCamera;
 
-  exec(cmd, (error, stdout, stderr) => {
+  console.log('startCameraCapture - executablePath: ' + cmd);
+  console.log('startCameraCapture - saveDir: ' + saveDir);
+
+  const cameraProgram = execFile(executablePath, [saveDir], (error, stdout, stderr) => {
     if (error) {
-        console.log(`error: ${error.message}`);
-        return;
+      // Something went wrong
+      console.log('ERROR:', error);
+      throw error;
+    } else {
+      console.log('SUCCESS');
     }
-    if (stderr) {
-        console.log(`stderr: ${stderr}`);
-        return;
-    }
-    console.log(`success - stdout: ${stdout}`);
+    console.log('stdout:', stdout);
   });
-};
 
-/* Note - this is where the original camera codes existed. 
-It has been removed in favor of triggereing a batch file 
-that runs the camera code. (see function above) - tn, 2023 */
+  cameraProgram.on('exit', (code) => {
+    console.log('cameraProgram EXITED with code ' + code);
+    if (code === 0) {
+      console.log('Yay! Caught successful exit code.');
+      // TODO: notify client computers of new sequence and images
+      // TODO: remove preset timer and use a callback instead
+    }
+  });
+
+  cameraProgram.on('close', (code) => {
+    console.log('cameraProgram CLOSED with code ' + code);
+  });
+
+
+
+  // exec(cmd, (error, stdout, stderr) => {
+  //   if (error) {
+  //       console.log(`error: ${error.message}`);
+  //       return;
+  //   }
+  //   if (stderr) {
+  //       console.log(`stderr: ${stderr}`);
+  //       return;
+  //   }
+  //   console.log(`success - stdout: ${stdout}`);
+  // });
+};
 
 ////////////////////////////////////////////////////////////////////////
 // ########################### Audio files ############################
@@ -377,7 +400,6 @@ var saveBut = document.querySelector('#save');
 
 saveBut.onclick = (e)=>{
   console.log("saveBut.onclick");
-  // startCameraCapture("my/directory/here/"); // temp
   save(document.querySelector('#folder').value,true);
 }
 
