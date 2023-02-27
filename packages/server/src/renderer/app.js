@@ -342,7 +342,7 @@ var countdown = (count) => {
     setTimeout(() => { countdown(count - 1); }, 1000);
     
     if(count == 1 ) {
-      dir = clientRoot + VISITOR_DIR + 'temp' + dirNum;
+      dir = clientRoot + VISITOR_DIR + 'temp' + dirNum + '/';
       console.log('Will save sequence to ' + dir);
       startCameraCapture(dir);
     }
@@ -364,7 +364,7 @@ var countdown = (count) => {
       console.log('done capturing');
       // var dir = './app/sequences/temp' + dirNum++;
       // var dir = clientRoot + VISITOR_DIR + 'temp' + dirNum++;
-      var savedDir = clientRoot + VISITOR_DIR + 'temp' + dirNum++;
+      var savedDir = clientRoot + VISITOR_DIR + 'temp' + dirNum++ + '/';
       console.log('visitor save dir: ' + dir);
       if(dirNum>=cfg.setsToStore) dirNum = 0;
       greenExitLight(1);
