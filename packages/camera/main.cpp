@@ -150,8 +150,8 @@ static void write(unsigned char byte, void *userdata) { fputc(byte, (FILE*) user
 // write Image to disk, called from thread pool
 void write_image(int unused, const char *prefix, Image img) {
 	// compute filename as [prefix] + [number].jpg
-	char filename[32];
-	snprintf(filename, 32, "%s%03d.jpg", prefix, img.index);
+	char filename[1024];
+	snprintf(filename, 1024, "%s%03d.jpg", prefix, img.index);
 
 	// open file
 	FILE *writer = fopen(filename, "wb");
