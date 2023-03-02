@@ -4,6 +4,6 @@ exports.config = {
   numImage: 800,
   imageGain: 3.99,
   setsToStore: 16,
-  pathToCamera: 'bash ../camera/temp.sh',
+  pathToCamera: '../camera/out/build/x64-Release/camera-capture.exe',
   fileSaveDelay: 10 * 1000, // ms to wait after cam script runs to assume files have finished saving
 };

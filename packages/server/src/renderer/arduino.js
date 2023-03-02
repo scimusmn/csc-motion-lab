@@ -4,6 +4,7 @@
 
 // var com = require('serialport');
 const SerialPort = require('serialport');
+const Parser = require('./SmmParser.js');
 
 console.log('SerialPort imported:');
 console.dir(SerialPort);
@@ -19,8 +20,15 @@ var serial = function() {
   _this.onMessage = () => {};
 
   _this.send = (arr) => {
-    arr.push(124);
-    if (_this.isOpen) ser.write(new Buffer(arr));
+    // arr.push(124);
+      // if (_this.isOpen) ser.write(new Buffer(arr));
+      
+      if (_this.isOpen) {
+          console.log('sending:', arr);
+          ser.write(arr + '\n');
+      } else {
+          console.log("WHOOPS serial was closed");
+      }
   };
 
   _this.open = (fxn) => {
@@ -54,18 +62,20 @@ var serial = function() {
     // Updated to work with latest serialport - tn, 2023
     ser = new SerialPort(portName, {
       baudRate: 115200,
-      dataBits: 8,
-      stopBits: 1,
-      parity: 'none',
-      parser: new SerialPort.parsers.Readline('\r\n', 'binary'),
-      buffersize:64*1024,
     });
 
+    _this.parser = ser.pipe(new Parser());
+
     ser.on('open', function() {
-      _this.isOpen = true;
-      ser.on('data', function(data) {
-        if (data == 'init') _this.onConnect();
-        _this.onMessage(data);
+        _this.isOpen = true;
+        console.log('serial successfully opened');
+        _this.onConnect();
+      _this.parser.on('data', function(data) {
+        const { key, value } = data;
+        console.log(data);
+        if (key !== null) {
+          _this.onMessage(key, value);
+        }
       });
 
     });
@@ -85,137 +95,46 @@ var sp = exports.serial;
 
 var Arduino = function() {
   this.ready = false;
+  this.watchers = {};
   var _this = this;
-  this.digiHandlers = [];
-  this.anaHandlers = [];
-
-  //////////////////////////////////////////
-  // variables for bit-banging the commands
-  //////////////////////////////////////////
-
-  var START = 128;
-  var DIGI_READ = 0;
-  var DIGI_WRITE = 32;  //pins 2-13
-  var ANA_READ = 64;
-  var DIGI_WATCH_2 = 72; //pins 14-19
-  var ANA_REPORT = 80;
-  var ANA_WRITE = 96;    //pins 3,5,6,9,10,11
-  var DIGI_WATCH = 112;  //pins 2-13
-
-  /*****************************************************
-   * explanation of bit packages to arduino
-
-   0 and 1 represent actual bits, letters are described below
-
-   For Digital Read:
-                      Byte 1
-           _______________________________
-          | 1 | 0 | 0 | D | D | 2 | 1 | 0 |
-           -------------------------------
-
-           D: bits representing pin number to read
-
-  For Digital Watch Pin on pins 2-13
-                      Byte 1
-           _______________________________
-          | 1 | 1 | 1 | 1 | D | D | D | D |
-           -------------------------------
-
-           D: bits representing the pin number (2-13) to watch
-
-      OR, for pins 14-19
-
-                      Byte 1
-           _______________________________
-          | 1 | 1 | 0 | 0 | 1 | D | D | D |
-           -------------------------------
-
-          D: bits representing the pin number (14-19 [but minus 14]) to watch
-
-  For Digital Write on pins 2-13:
-                     Byte 1
-           _______________________________
-          | 1 | 0 | 1 | P | P | P | P | S |
-           -------------------------------
-
-          P: bits representing pin number to read
-          S: bit indicating pin state
-
-  For Analog Read on pins 0-5:
-                     Byte 1
-           _______________________________
-          | 1 | 1 | 0 | 0 | 0 | P | P | P |
-           -------------------------------
-
-          P: bits representing pin number to read
-
-  For Analog Report on pins 0-5:
-                 Byte 1                                   Byte 2
-       _______________________________        _______________________________
-      | 1 | 1 | 0 | 1 | P | P | P | T |      | 0 | T | T | T | T | T | T | T |
-       -------------------------------        -------------------------------
-
-      P: bits representing pin number to read
-      T: bits representing half of the interval time between reports
-
-  For Analog Write on pins 3,5,6,9,10,11:
-                 Byte 1                                   Byte 2
-       _______________________________        _______________________________
-      | 1 | 1 | 1 | 0 | P | P | P | V |      | 0 | V | V | V | V | V | V | V |
-       -------------------------------        -------------------------------
-
-      P: bits representing pin number to write 3=0,5=1,6=2,9=3,10=4,11=5
-      V: bits representing the value to write to the pin
-
-  /*****************************************************
-   * explanation of bit packages from arduino
-   *****************************************************
-
-  For Analog Read:
-                  Byte 1                                   Byte 2
-       _______________________________        _______________________________
-      | 1 | 1 | P | P | P | V | V | V |      | 0 | V | V | V | V | V | V | V |
-       -------------------------------        -------------------------------
-
-      P: bits representing pin number to read 3=0,5=1,6=2,9=3,10=4,11=5
-      V: bits representing the value read from the pin
-
-  For Digital Read:
-                  Byte 1
-       _______________________________
-      | 1 | 1 | P | P | P | P | P | V |
-       -------------------------------
-
-      P: bits representing the pin being reported 0-32
-      V: bit representing the value read from the pin 0 or 1
-
-  */
 
   this.ws = null;
 
-  this.onMessage = function(data) {
-    let msg = data;
-    if (msg.length >= 1) {
-      for (var i = 0; i < msg.length; i++) {
-        var chr = msg.charCodeAt(i);
-        if (chr & ANA_READ) {  //if the packet is analogRead
-          var pin = ((chr & 56) >> 3);        //extract the pin number
-          var val = ((chr & 7) << 7) + (msg.charCodeAt(++i) & 127); //extract the value
-          if (typeof _this.anaHandlers[pin] == 'function') _this.anaHandlers[pin](pin, val);
-        } else if (chr & (START + DIGI_READ)) {      //if the packet is digitalRead
-          //extract the pin number
-          var pin = ((chr & 62) >> 1);
-          var val = chr & 1;
-          if (typeof _this.digiHandlers[pin] == 'function') _this.digiHandlers[pin](pin, val);
+    this.onMessage = function (key, value) {
+        if (key === 'go-high') {
+        	this.watchers[value](value, true);
+        } else if (key === 'go-low') {
+        	this.watchers[value](value, false);
         }
-      }
-    }
-  };
+    };
+
+    this.configureDigitalOutput = function (pin) {
+        const configureMsg = '{configure-output:' + pin + '}';
+        console.log('configureMsg - ', configureMsg);
+        sp.send(configureMsg);
+    };
+
+    this.configureInputPullup = function (pin) {
+        const configureMsg = '{configure-pullup:' + pin + '}';
+        sp.send(configureMsg);
+    };
+
+    this.configureInput = function (pin) {
+        const configureMsg = '{configure-input:' + pin + '}';
+        sp.send(configureMsg);
+    };
 
   this.digitalWrite = function(pin, state) {
-    if (!_this.isOpen) return;
-    if (pin <= 15) sp.send([START + DIGI_WRITE + ((pin & 15) << 1) + (state & 1)]);
-    else console.log('Pin must be less than or equal to 15');
+    // if (!_this.isOpen) return;
+   // if (pin <= 15) sp.send([START + DIGI_WRITE + ((pin & 15) << 1) + (state & 1)]);
+    //  else console.log('Pin must be less than or equal to 15');
+      console.log('digitalWrite', pin, state);
+      if (state === 0) {
+          sp.send('{write-low:' + pin + '}');
+      } else {
+          sp.send('{write-high:' + pin + '}');
+      }
+     
   };
 
   this.digitalRead = function(pin) {
@@ -230,10 +149,9 @@ var Arduino = function() {
   };
 
   this.watchPin = function(pin, handler) {
-    console.log('set up watch on pin ' + pin);
-    if (pin <= 13) sp.send([START + DIGI_WATCH + (pin & 15)]);
-    else sp.send([START + DIGI_WATCH_2 + ((pin - 13) & 7)]);
-    this.digiHandlers[pin] = handler;
+      console.log('set up watch on pin ' + pin);
+      this.watchers[pin] = handler;
+      sp.send('{watch-pin:' + pin + '}');
   };
 
   this.analogReport = function(pin, interval, handler) {
@@ -242,7 +160,9 @@ var Arduino = function() {
       sp.send([START + ANA_REPORT + ((pin & 7) << 1) + (interval >> 7), interval & 127]);
       this.anaHandlers[pin] = handler;
     } else console.log('interval must be less than 512');
-  };
+    };
+
+    
 
   this.setAnalogHandler = function(pin, handler) {
     this.anaHandlers[pin] = handler;
@@ -277,7 +197,7 @@ var Arduino = function() {
   this.connect = function(fxn) {
     console.log("arduino.js connect");
     exports.serial.onConnect = fxn;
-    exports.serial.open(_this.onMessage);
+    exports.serial.open((k, v) => this.onMessage(k, v));
   };
 
   this.createdCallback = function() {

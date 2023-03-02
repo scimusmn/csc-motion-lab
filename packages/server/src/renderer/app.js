@@ -19,8 +19,8 @@ var { exec, execFile } = require('child_process');
 var pathHelper = require('path');
 var clientRoot = pathHelper.join(__dirname, '../../../client');
 
-const VISITOR_DIR = '/sequences/';
-const CELEBRITY_DIR = '/celeb_seq/';
+const VISITOR_DIR = '\\sequences\\';
+const CELEBRITY_DIR = '\\celeb_seq\\';
 
 console.log('clientRoot', clientRoot);
 app.use(express.static(clientRoot));
@@ -65,7 +65,7 @@ var idle = ()=> {
   console.log('idle', waitForSave);
   timeoutFlag = true;
   cageReset();
-  if(waitForSave) location.reload();
+  // if(waitForSave) location.reload();
   redEntranceLight(1);
   greenEntranceLight(0);
 }
@@ -164,8 +164,8 @@ for (var i = 0; i < 4; i++) {
 
 // TODO: Clarify the difference between these two pins.
 // Does one control the BrightSign video (13) and the other control the practice cage light (12)?
-const PIN_BRIGHTSIGN_PRACTICE = 13;
-const PIN_BRIGHTSIGN_GO = 12;  
+const PIN_BRIGHTSIGN_PRACTICE = 21;
+const PIN_BRIGHTSIGN_GO = 20;  
 
 window.loopPractice = () => {
   arduino.digitalWrite(PIN_BRIGHTSIGN_PRACTICE, 0);
@@ -204,14 +204,14 @@ window.showPracticeAudio = (fxn) => {
 };
 
 ////////////////////////////////////////////////////////////////////////
-// ###### Aliases for controlling the lights via arduino. ########### //
+// ###### Aliases for controlling the lights via arduino. ########### /
 ////////////////////////////////////////////////////////////////////////
 
-const PIN_GREEN_EXIT_LIGHT = 3;
-const PIN_RED_EXIT_LIGHT = 4;
+const PIN_GREEN_EXIT_LIGHT = 3; // Also connected to bottom of start wedge
+const PIN_RED_EXIT_LIGHT = 4; // Also connected to top of start wedge
 
-const PIN_GREEN_ENTRANCE_LIGHT = 5;
-const PIN_RED_ENTRANCE_LIGHT = 6;
+const PIN_GREEN_PRACTICE_LIGHT = 5; // Also connected to cage entrance green light
+const PIN_RED_PRACTICE_LIGHT = 6; // Also connected to cage entrance red light
 
 var greenExitLight = (state) => {
   arduino.digitalWrite(PIN_GREEN_EXIT_LIGHT, state);
@@ -222,17 +222,21 @@ var redExitLight = (state) => {
 };
 
 var greenEntranceLight = (state) => {
-  arduino.digitalWrite(PIN_GREEN_ENTRANCE_LIGHT, state);
+  arduino.digitalWrite(PIN_GREEN_PRACTICE_LIGHT, state);
 };
 
 var redEntranceLight = (state) => {
-  arduino.digitalWrite(PIN_RED_ENTRANCE_LIGHT, state);
+  arduino.digitalWrite(PIN_RED_PRACTICE_LIGHT, state);
   if (state) loopPractice();
 };
 
-const PINS_POLL_LIGHTS = [7,8,9,10,15];
-const PIN_POLL_LIGHT_GREEN = 8;
-const PIN_POLL_LIGHT_RED = 7;
+// 7 is first amber light (top of pole)
+// 8 is second amber
+// 9 is third amber
+//const PINS_POLL_LIGHTS = [7,8,9,10,11];
+const PINS_POLL_LIGHTS = [11,10,9,8,7];
+const PIN_POLL_LIGHT_GREEN = 7;
+const PIN_POLL_LIGHT_RED = 11;
 
 var pollLight = new function(){
   var cInt = null;
@@ -306,9 +310,9 @@ window.save = (dir, saveOther) => {
 
   // We delete the folder here, and recreate it as an empty folder.
   // The camera script will not work unless the folder is already empty.
-  if (fs.existsSync(dir)) deleteFolderRecursive(dir);
-  fs.mkdirSync(dir);
-  console.log('Folder is empty: ' + dir);
+  // if (fs.existsSync(dir)) deleteFolderRecursive(dir);
+  // fs.mkdirSync(dir);
+  // console.log('Folder is empty: ' + dir);
 
   output.textContent = 'Saving...';
   
@@ -319,7 +323,7 @@ window.save = (dir, saveOther) => {
     //force folder to update it's modification time.
     fs.utimesSync(dir, new Date(), new Date());
 
-    const seqPath = dir.split('/client')[1];
+    const seqPath = dir.split('\\client')[1];
     console.log('seqPath: ' + seqPath);
     if (wss&&!saveOther) wss.broadcast('seq=' + seqPath);
     console.log('saved to ' + dir);
@@ -342,8 +346,11 @@ var countdown = (count) => {
     setTimeout(() => { countdown(count - 1); }, 1000);
     
     if(count == 1 ) {
-      dir = clientRoot + VISITOR_DIR + 'temp' + dirNum + '/';
-      console.log('Will save sequence to ' + dir);
+      dir = clientRoot + VISITOR_DIR + 'temp' + dirNum + '\\';
+        console.log('Will save sequence to ' + dir);
+        if (fs.existsSync(dir)) deleteFolderRecursive(dir);
+        fs.mkdirSync(dir);
+        console.log('Folder is empty: ' + dir);
       startCameraCapture(dir);
     }
     else if(count == 5) getReady.play();
@@ -364,7 +371,7 @@ var countdown = (count) => {
       console.log('done capturing');
       // var dir = './app/sequences/temp' + dirNum++;
       // var dir = clientRoot + VISITOR_DIR + 'temp' + dirNum++;
-      var savedDir = clientRoot + VISITOR_DIR + 'temp' + dirNum++ + '/';
+      var savedDir = clientRoot + VISITOR_DIR + 'temp' + dirNum++ + '\\';
       console.log('visitor save dir: ' + dir);
       if(dirNum>=cfg.setsToStore) dirNum = 0;
       greenExitLight(1);
@@ -373,7 +380,8 @@ var countdown = (count) => {
         greenExitLight((blinkBool)?1:0);
       },500)
       clearInterval(redInt);
-      redExitLight(0);
+        redExitLight(0);
+        
       save(savedDir);
     }, cfg.recordTime);
   }
@@ -449,25 +457,67 @@ var cageReset = ()=>{
 var ardTimeout = null;
 
 const PIN_START_COUNTDOWN_BTN = 2;
-const PIN_EXIT_CAGE_SENSOR = 14;
-const PIN_PRACTICE_CAGE_SENSOR = 16;
+const PIN_EXIT_CAGE_SENSOR = 23;
+const PIN_PRACTICE_CAGE_SENSOR = 12;
 
 var resetArduinoHeartbeat = (time)=>{
-  if(ardTimeout) clearTimeout(ardTimeout);
-  ardTimeout = setTimeout(()=>{
-    console.log('Arduino not responsive, reloading.');
-    location.reload();
-  },time);
+//  if(ardTimeout) clearTimeout(ardTimeout);
+//  ardTimeout = setTimeout(()=>{
+//    console.log('Arduino not responsive, reloading.');
+//    location.reload();
+//  },time);
 }
 
 resetArduinoHeartbeat(60000);
 
 var heartbeatInt = null;
 
+console.log('ATTEMPTING CONNECT');
 arduino.connect(function() {
-  console.log('app.js - Connecting to Arduino...');
-  //pollLight.setStage(4);
+    console.log('app.js - Connecting to Arduino...');
 
+    setTimeout(() => {
+//        console.log('light test configure');
+//        arduino.configureDigitalOutput(PIN_GREEN_EXIT_LIGHT);
+//        arduino.configureDigitalOutput(PIN_POLL_LIGHT_RED);
+//        arduino.configureInputPullup(PIN_START_COUNTDOWN_BTN);
+//        arduino.watchPin(PIN_START_COUNTDOWN_BTN, (pin, state) => {
+//        	console.log('watch on start button', state);
+//        });
+//
+//        setTimeout(() => {
+//            console.log('light test on');
+//            arduino.digitalWrite(PIN_GREEN_EXIT_LIGHT, 1);
+//            arduino.digitalWrite(PIN_POLL_LIGHT_RED, 1);
+//
+//            setTimeout(() => {
+//                console.log('light test off');
+//                arduino.digitalWrite(PIN_GREEN_EXIT_LIGHT, 0);
+//                arduino.digitalWrite(PIN_POLL_LIGHT_RED, 0);
+//            }, 5000);
+//        }, 5000);
+
+
+  // configure pins
+  arduino.configureDigitalOutput(PIN_BRIGHTSIGN_PRACTICE);
+  arduino.configureDigitalOutput(PIN_BRIGHTSIGN_GO);
+
+  arduino.configureDigitalOutput(PIN_GREEN_EXIT_LIGHT);
+  arduino.configureDigitalOutput(PIN_RED_EXIT_LIGHT);
+  arduino.configureDigitalOutput(PIN_GREEN_PRACTICE_LIGHT);
+  arduino.configureDigitalOutput(PIN_RED_PRACTICE_LIGHT);
+
+  for (let pin of PINS_POLL_LIGHTS) {
+    arduino.configureDigitalOutput(pin);
+  }
+  arduino.configureDigitalOutput(PIN_POLL_LIGHT_GREEN);
+  arduino.configureDigitalOutput(PIN_POLL_LIGHT_RED);
+
+  arduino.configureInputPullup(PIN_START_COUNTDOWN_BTN);
+  arduino.configureInputPullup(PIN_EXIT_CAGE_SENSOR);
+  arduino.configureInputPullup(PIN_PRACTICE_CAGE_SENSOR);
+
+  // original code resumes
   arduino.watchPin(PIN_START_COUNTDOWN_BTN, window.startCntdn);
 
   arduino.watchPin(PIN_EXIT_CAGE_SENSOR, function(pin, state) {
@@ -490,32 +540,23 @@ arduino.connect(function() {
         }
       }
     }
+    
   });
 
-  arduino.analogReport(PIN_GREEN_ENTRANCE_LIGHT,500,(pin,val)=>{
-    console.log('Heartbeat');
-    resetArduinoHeartbeat(10000);
-  });
-
-
-  /*heartbeatInt = setInterval(()=>{
-    console.log('Try to get heartbeat.');
-    arduino.analogRead(5);
-  },1000);*/
+//  arduino.analogReport(PIN_GREEN_PRACTICE_LIGHT,500,(pin,val)=>{
+//    console.log('Heartbeat');
+//    resetArduinoHeartbeat(10000);
+//  });
+//
 
   console.log('Connected to arduino');
 
-  /*greenExitLight(0);
-  //redExitLight(1);
-  clearInterval(redInt);
-  redInt = setInterval(()=>{
-    blinkBool = !blinkBool;
-    redExitLight((blinkBool)?1:0);
-  },500);
-  greenEntranceLight( 1);
-  redEntranceLight( 0);*/
 
-  idle();
+    idle();
+
+
+    }, 2000);
+  
 });
 
 /////////////////////////////////////////////////////////////////////////////
@@ -570,7 +611,7 @@ wss.on('connection', function(ws) {
     switch (message.split('=')[0]){
       case 'del':
         console.log('deleting folder ' + message.split('=')[1]);
-        var delPath = clientRoot + message.split('=')[1] + '/';
+        var delPath = clientRoot + message.split('=')[1] + '\\';
         console.log('delPath: ' + delPath);
         deleteFolderRecursive(delPath);
         wss.broadcast('reload');

@@ -27,3 +27,7 @@ release
 **/renderer/assets/*
 
 !**/assets/.gitkeep
+
+# vim files
+*~
+*.swp
