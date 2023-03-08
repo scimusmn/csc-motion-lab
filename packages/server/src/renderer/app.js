@@ -85,11 +85,12 @@ var output = document.querySelector('#output');
 var startCameraCapture = function(saveDir) {
 
   var executablePath = cfg.pathToCamera;
+  var camGain = cfg.cameraGain.toString();
 
   console.log('startCameraCapture - executablePath: ' + executablePath);
   console.log('startCameraCapture - saveDir: ' + saveDir);
 
-  const cameraProgram = execFile(executablePath, [saveDir], (error, stdout, stderr) => {
+  const cameraProgram = execFile(executablePath, [camGain, saveDir], (error, stdout, stderr) => {
     if (error) {
       // Something went wrong
       console.log('ERROR:', error);
