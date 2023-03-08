@@ -5,8 +5,10 @@
 
 @font-face {
   font-family: 'Avenir Next Condensed';
-  src: url('/media/fonts/AvenirNextCondensed.woff') format('woff'),
-  url('/media/fonts/AvenirNextCondensed.ttf') format('truetype');
+  /* src: url('/media/fonts/AvenirNextCondensed.woff') format('woff'),
+  url('/media/fonts/AvenirNextCondensed.ttf') format('truetype'); */
+  src: url('assets/fonts/AvenirNextCondensed-Regular.woff') format('woff'),
+  url('assets/fonts/AvenirNextCondensed-Regular.ttf') format('truetype');
   font-style: normal;
 }
 
