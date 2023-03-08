@@ -50,11 +50,12 @@ do { \
 
 int main(int argc, char **argv) {
 	// get the file prefix (used to prepend "tempXXX\" to the filename)
-	if (argc < 2) {
-		fprintf(stderr, "[FATAL] No file prefix specified!\n");
+	if (argc < 3) {
+		fprintf(stderr, "[FATAL] Mus specify gain and file prefix!\n");
 		return 1;
 	}
-	prefix = argv[1];
+	char* gain = argv[1];
+	prefix = argv[2];
 
 	// create GigE driver
 	VWGIGE_HANDLE driver = NULL;
@@ -95,6 +96,9 @@ int main(int argc, char **argv) {
 	// configure camera
 	result = CameraSetPixelFormat(camera, PIXEL_FORMAT_RGB8);
 	CHECK_ERROR(result, "set camera pixel format");
+
+	result = CameraSetCustomCommand(camera, "Gain", gain, true);
+	CHECK_ERROR(result, "set camera gain");
 
 	result = CameraSetWidth(camera, IMAGE_WIDTH);
 	CHECK_ERROR(result, "set camera image width");
