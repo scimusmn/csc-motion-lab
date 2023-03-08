@@ -17,7 +17,10 @@ include([], function() {
 
       //grabs the middle image from the set for the thumbnail image.
       _this.setImage = ()=> {
-        var jpgPath = "url('" + _this.setName + '/400.jpg?' + Math.random() + "')";
+
+        // swap any slashes left over from windows file path
+        var setNameUrl = _this.setName.replace(/\\/g, "/");
+        var jpgPath = "url('" + setNameUrl + '/400.jpg?' + Math.random() + "')";
         _this.style.backgroundImage = jpgPath;
       };
     };

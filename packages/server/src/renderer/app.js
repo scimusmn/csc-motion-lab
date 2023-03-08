@@ -587,10 +587,12 @@ wss.on('connection', function(ws) {
   var files = readDir(clientRoot + VISITOR_DIR);
   var celFiles = readDir(clientRoot + CELEBRITY_DIR);
 
+  var splitKey = 'client';
+
   if (ws) {
     for (var i = 0; i < files.length; i++) {
       if (files[i].indexOf('.DS_Store') === -1) {
-        var path = files[i].split('/client')[1];
+        var path = files[i].split(splitKey)[1];
         // console.log("send seq: " + path + "");
         ws.send('seq=' + path);
       }
@@ -598,7 +600,7 @@ wss.on('connection', function(ws) {
 
     for (var i = 0; i < celFiles.length; i++) {
       if (celFiles[i].indexOf('.DS_Store') === -1) {
-        var path = celFiles[i].split('/client')[1];
+        var path = celFiles[i].split(splitKey)[1];
         // console.log("send cel: " + path + "");
         ws.send('cel=' + path);
       }
