@@ -148,11 +148,50 @@ struct Image {
 };
 
 
+void copy_px(struct Image *img, unsigned char *dst, int x0, int y0, int x1, int y1)
+{
+	int w = img->w;
+	int h = img->h;
+
+	unsigned long source_index = 3*((w*y0) + x0);
+	unsigned long dest_index = 3*((h*y1) + x1);
+
+	//printf("[%d] %d <- %d\n", img->index, dest_index, source_index);
+	for (int i=0; i<3; i++) {
+		dst[dest_index+i] = img->data[source_index+i];
+	}
+}
+
+
+void rotate_ccw(struct Image *img) {
+	unsigned char *dest = (unsigned char *) malloc(img->w * img->h * 3 * sizeof(unsigned char));
+
+	for (unsigned int x=0; x<img->w; x++) {
+		for (unsigned int y=0; y<img->h; y++) {
+			int x0 = x;
+			int y0 = y;
+			int x1 = y;
+			int y1 = img->w-x-1;
+			copy_px(img, dest, x0, y0, x1, y1);
+		}
+	}
+
+	free(img->data);
+	img->data = dest;
+	unsigned int w = img->w;
+	img->w = img->h;
+	img->h = w;
+}
+
+
 // helper function for writing toojpeg output to disk
 static void write(unsigned char byte, void *userdata) { fputc(byte, (FILE*) userdata); }
 
 // write Image to disk, called from thread pool
 void write_image(int unused, const char *prefix, Image img) {
+	// rotate image to correct orientation
+	rotate_ccw(&img);
+
 	// compute filename as [prefix] + [number].jpg
 	char filename[1024];
 	snprintf(filename, 1024, "%s%03d.jpg", prefix, img.index);
