@@ -48,12 +48,20 @@ do { \
 
 // --===== main =====--
 
-int main(int argc, char **argv) {
+int run(int argc, char** argv, bool is_retry);
+
+int main(int argc, char** argv) {
+	return run(argc, argv, false);
+}
+
+
+int run(int argc, char **argv, bool is_retry) {
 	// get the file prefix (used to prepend "tempXXX\" to the filename)
 	if (argc < 3) {
 		fprintf(stderr, "[FATAL] Mus specify gain and file prefix!\n");
 		return 1;
 	}
+	frame_count = 0;
 	char* gain = argv[1];
 	prefix = argv[2];
 
@@ -109,15 +117,25 @@ int main(int argc, char **argv) {
 	// grab images
 	result = CameraGrab(camera);
 	CHECK_ERROR(result, "begin acquiring images");
-	std::this_thread::sleep_for(5s);
+	// testing found 450 ms to be the lowest working value to acquire 50 frames; we wait for 900ms to make ABSOLUTELY CERTAIN
+	// that 50 frames are in the queue if the system is working
+	std::this_thread::sleep_for(900ms);
 	// communication errors usually produce either no frames or ~10 frames of output, so
 	// we can identify them by waiting for a bit and checking our count
 	if (frame_count < 50) {
 		// some sort of communication error has occurred
-		fprintf(stderr, "!!! FAILED TO COMMUNICATE WITH CAMERA !!!\n");
-		write_pool.stop(false);
-		RELEASE_RESOURCES; // release camera & gigE driver
-		return 1;
+		if (!is_retry) {
+			RELEASE_RESOURCES;
+			write_pool.clear_queue();
+			fprintf(stderr, "Communication error detected; retrying...\n");
+			return run(argc, argv, true);
+		}
+		else {
+			fprintf(stderr, "[FATAL] Communication error persists!\n");
+			RELEASE_RESOURCES;
+			write_pool.stop(false);
+			return 1;
+		}
 	}
 	while (frame_count < FRAME_COUNT) {}
 	RELEASE_RESOURCES; // release camera & gigE driver
