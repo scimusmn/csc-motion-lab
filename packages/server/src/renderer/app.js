@@ -14,7 +14,7 @@ var fs = require('fs');
 var express = require('express');
 var app = express();
 
-var { exec, execFile } = require('child_process');
+var { exec, execFile, spawn } = require('child_process');
 
 var pathHelper = require('path');
 var clientRoot = pathHelper.join(__dirname, '../../../client');
@@ -114,19 +114,25 @@ var startCameraCapture = function(saveDir) {
     console.log('cameraProgram CLOSED with code ' + code);
   });
 
+  // const spawnOptions = {};
+  // // detached: true
+  // // shell: true
+  // // windowsHide: true
 
+  // const spawnedCam = spawn(executablePath, [camGain, saveDir], spawnOptions);
 
-  // exec(cmd, (error, stdout, stderr) => {
-  //   if (error) {
-  //       console.log(`error: ${error.message}`);
-  //       return;
-  //   }
-  //   if (stderr) {
-  //       console.log(`stderr: ${stderr}`);
-  //       return;
-  //   }
-  //   console.log(`success - stdout: ${stdout}`);
+  // spawnedCam.stdout.on('data', (data) => {
+  //   console.log(`--> stdout: ${data}`);
   // });
+  
+  // spawnedCam.stderr.on('data', (data) => {
+  //   console.error(`--> stderr: ${data}`);
+  // });
+  
+  // spawnedCam.on('close', (code) => {
+  //   console.log(`--> child process exited with code ${code}`);
+  // });
+
 };
 
 ////////////////////////////////////////////////////////////////////////
