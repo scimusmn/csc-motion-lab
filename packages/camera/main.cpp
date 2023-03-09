@@ -48,12 +48,20 @@ do { \
 
 // --===== main =====--
 
-int main(int argc, char **argv) {
+int run(int argc, char** argv, bool is_retry);
+
+int main(int argc, char** argv) {
+	return run(argc, argv, false);
+}
+
+
+int run(int argc, char **argv, bool is_retry) {
 	// get the file prefix (used to prepend "tempXXX\" to the filename)
 	if (argc < 3) {
 		fprintf(stderr, "[FATAL] Mus specify gain and file prefix!\n");
 		return 1;
 	}
+	frame_count = 0;
 	char* gain = argv[1];
 	prefix = argv[2];
 
@@ -109,15 +117,25 @@ int main(int argc, char **argv) {
 	// grab images
 	result = CameraGrab(camera);
 	CHECK_ERROR(result, "begin acquiring images");
-	std::this_thread::sleep_for(5s);
+	// testing found 450 ms to be the lowest working value to acquire 50 frames; we wait for 900ms to make ABSOLUTELY CERTAIN
+	// that 50 frames are in the queue if the system is working
+	std::this_thread::sleep_for(900ms);
 	// communication errors usually produce either no frames or ~10 frames of output, so
 	// we can identify them by waiting for a bit and checking our count
 	if (frame_count < 50) {
 		// some sort of communication error has occurred
-		fprintf(stderr, "!!! FAILED TO COMMUNICATE WITH CAMERA !!!\n");
-		write_pool.stop(false);
-		RELEASE_RESOURCES; // release camera & gigE driver
-		return 1;
+		if (!is_retry) {
+			RELEASE_RESOURCES;
+			write_pool.clear_queue();
+			fprintf(stderr, "Communication error detected; retrying...\n");
+			return run(argc, argv, true);
+		}
+		else {
+			fprintf(stderr, "[FATAL] Communication error persists!\n");
+			RELEASE_RESOURCES;
+			write_pool.stop(false);
+			return 1;
+		}
 	}
 	while (frame_count < FRAME_COUNT) {}
 	RELEASE_RESOURCES; // release camera & gigE driver
@@ -148,11 +166,50 @@ struct Image {
 };
 
 
+void copy_px(struct Image *img, unsigned char *dst, int x0, int y0, int x1, int y1)
+{
+	int w = img->w;
+	int h = img->h;
+
+	unsigned long source_index = 3*((w*y0) + x0);
+	unsigned long dest_index = 3*((h*y1) + x1);
+
+	//printf("[%d] %d <- %d\n", img->index, dest_index, source_index);
+	for (int i=0; i<3; i++) {
+		dst[dest_index+i] = img->data[source_index+i];
+	}
+}
+
+
+void rotate_ccw(struct Image *img) {
+	unsigned char *dest = (unsigned char *) malloc(img->w * img->h * 3 * sizeof(unsigned char));
+
+	for (unsigned int x=0; x<img->w; x++) {
+		for (unsigned int y=0; y<img->h; y++) {
+			int x0 = x;
+			int y0 = y;
+			int x1 = y;
+			int y1 = img->w-x-1;
+			copy_px(img, dest, x0, y0, x1, y1);
+		}
+	}
+
+	free(img->data);
+	img->data = dest;
+	unsigned int w = img->w;
+	img->w = img->h;
+	img->h = w;
+}
+
+
 // helper function for writing toojpeg output to disk
 static void write(unsigned char byte, void *userdata) { fputc(byte, (FILE*) userdata); }
 
 // write Image to disk, called from thread pool
 void write_image(int unused, const char *prefix, Image img) {
+	// rotate image to correct orientation
+	rotate_ccw(&img);
+
 	// compute filename as [prefix] + [number].jpg
 	char filename[1024];
 	snprintf(filename, 1024, "%s%03d.jpg", prefix, img.index);
