@@ -22,8 +22,8 @@ const pins = {
 	PIN_PRACTICE_CAGE_SENSOR: 12,
 };
 
-
-module.exports = function(arduino) {
+function configurePins(arduino) {
+	console.log('configurePins');
 	arduino.configureDigitalOutput(pins.PIN_BRIGHTSIGN_AUDIO);
 	arduino.configureDigitalOutput(pins.PIN_BRIGHTSIGN_PRACTICE);
 	arduino.configureDigitalOutput(pins.PIN_BRIGHTSIGN_GO);
@@ -42,6 +42,13 @@ module.exports = function(arduino) {
 	arduino.configureInputPullup(pins.PIN_START_COUNTDOWN_BTN);
 	arduino.configureInputPullup(pins.PIN_EXIT_CAGE_SENSOR);
 	arduino.configureInputPullup(pins.PIN_PRACTICE_CAGE_SENSOR);
+}
+
+module.exports = function(arduino) {
+	// Wait for the arduino to be ready
+	setTimeout(() => {
+		configurePins(arduino);
+	}, 2000);
 
 	return pins;
 };
