@@ -34,10 +34,11 @@ module.exports = function(arduino) {
 	arduino.configureDigitalOutput(pins.PIN_RED_PRACTICE_LIGHT);
 
 	for (let pin of pins.PINS_POLE_LIGHTS) {
+		console.log('Configuring pin ' + pin);
 		arduino.configureDigitalOutput(pin);
 	}
-	arduino.configureDigitalOutput(pins.PIN_POLL_LIGHT_GREEN);
-	arduino.configureDigitalOutput(pins.PIN_POLL_LIGHT_RED);
+	arduino.configureDigitalOutput(pins.PIN_POLE_LIGHT_GREEN);
+	arduino.configureDigitalOutput(pins.PIN_POLE_LIGHT_RED);
 
 	arduino.configureInputPullup(pins.PIN_START_COUNTDOWN_BTN);
 	arduino.configureInputPullup(pins.PIN_EXIT_CAGE_SENSOR);
