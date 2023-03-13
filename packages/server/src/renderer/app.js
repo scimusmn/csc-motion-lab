@@ -9,6 +9,21 @@
 window.arduino = require('./arduino.js').arduino;
 var serial = require('./arduino.js').serial;
 var cfg = require('./config.js').config;
+var {
+    PIN_BRIGHTSIGN_AUDIO,
+    PIN_BRIGHTSIGN_PRACTICE,
+    PIN_BRIGHTSIGN_GO,
+    PIN_GREEN_EXIT_LIGHT,
+    PIN_RED_EXIT_LIGHT,
+    PIN_GREEN_PRACTICE_LIGHT,
+    PIN_RED_PRACTICE_LIGHT,
+    PINS_POLE_LIGHTS,
+    PIN_POLE_LIGHT_GREEN,
+    PIN_POLE_LIGHT_RED,
+    PIN_START_COUNTDOWN_BTN,
+    PIN_EXIT_CAGE_SENSOR,
+    PIN_PRACTICE_CAGE_SENSOR
+} = require('./pins.js')(arduino);
 var fs = require('fs');
 
 var express = require('express');
@@ -114,65 +129,11 @@ var startCameraCapture = function(saveDir) {
     console.log('cameraProgram CLOSED with code ' + code);
   });
 
-  // const spawnOptions = {};
-  // // detached: true
-  // // shell: true
-  // // windowsHide: true
-
-  // const spawnedCam = spawn(executablePath, [camGain, saveDir], spawnOptions);
-
-  // spawnedCam.stdout.on('data', (data) => {
-  //   console.log(`--> stdout: ${data}`);
-  // });
-  
-  // spawnedCam.stderr.on('data', (data) => {
-  //   console.error(`--> stderr: ${data}`);
-  // });
-  
-  // spawnedCam.on('close', (code) => {
-  //   console.log(`--> child process exited with code ${code}`);
-  // });
-
 };
-
-////////////////////////////////////////////////////////////////////////
-// ########################### Audio files ############################
-////////////////////////////////////////////////////////////////////////
-
-let beep = document.querySelector('#beep');
-beep.load();
-
-let longBeep = document.querySelector('#longBeep');
-longBeep.load();
-
-let clickTrack = document.querySelector('#click');
-clickTrack.load();
-
-let getReady = document.querySelector('#getReady');
-getReady.load();
-
-getReady.volume = .75;
-
-let exitTrack = document.querySelector('#exit');
-exitTrack.load();
-
-exitTrack.volume = .75;
-
-let audio = [];
-
-for (var i = 0; i < 4; i++) {
-  audio.push(document.querySelector('#audio_' + (i)));
-  audio[i].load();
-}
 
 ////////////////////////////////////////////////////////////////////////
 // ############### Practice Cage brightsign triggers ###################
 ////////////////////////////////////////////////////////////////////////
-
-// TODO: Clarify the difference between these two pins.
-// Does one control the BrightSign video (13) and the other control the practice cage light (12)?
-const PIN_BRIGHTSIGN_PRACTICE = 21;
-const PIN_BRIGHTSIGN_GO = 20;  
 
 window.loopPractice = () => {
   arduino.digitalWrite(PIN_BRIGHTSIGN_PRACTICE, 0);
@@ -190,7 +151,6 @@ window.showGo = () => {
     arduino.digitalWrite(PIN_BRIGHTSIGN_GO, 1);
     setTimeout(() => {
       goShown = false;
-      //loopPractice();
     }, 17000);
   }, 100);
 };
@@ -214,12 +174,6 @@ window.showPracticeAudio = (fxn) => {
 // ###### Aliases for controlling the lights via arduino. ########### /
 ////////////////////////////////////////////////////////////////////////
 
-const PIN_GREEN_EXIT_LIGHT = 3; // Also connected to bottom of start wedge
-const PIN_RED_EXIT_LIGHT = 4; // Also connected to top of start wedge
-
-const PIN_GREEN_PRACTICE_LIGHT = 5; // Also connected to cage entrance green light
-const PIN_RED_PRACTICE_LIGHT = 6; // Also connected to cage entrance red light
-
 var greenExitLight = (state) => {
   arduino.digitalWrite(PIN_GREEN_EXIT_LIGHT, state);
 };
@@ -237,14 +191,6 @@ var redEntranceLight = (state) => {
   if (state) loopPractice();
 };
 
-// 7 is first amber light (top of pole)
-// 8 is second amber
-// 9 is third amber
-//const PINS_POLL_LIGHTS = [7,8,9,10,11];
-const PINS_POLL_LIGHTS = [11,10,9,8,7];
-const PIN_POLL_LIGHT_GREEN = 7;
-const PIN_POLL_LIGHT_RED = 11;
-
 var pollLight = new function(){
   var cInt = null;
 
@@ -260,30 +206,30 @@ var pollLight = new function(){
   var cCount = 0;
 
   this.setGreen = function(){
-    for(let i=0; i<PINS_POLL_LIGHTS.length; i++){
-      arduino.digitalWrite(PIN_POLL_LIGHTS[i], 0);
+    for(let i=0; i<PINS_POLE_LIGHTS.length; i++){
+      arduino.digitalWrite(PIN_POLE_LIGHTS[i], 0);
     }
-    arduino.digitalWrite(PIN_POLL_LIGHT_GREEN, 1);
+    arduino.digitalWrite(PIN_POLE_LIGHT_GREEN, 1);
   };
 
   this.setRed = function(){
-    for(let i=0; i<PINS_POLL_LIGHTS.length; i++){
-      arduino.digitalWrite(PINS_POLL_LIGHTS[i],0);
+    for(let i=0; i<PINS_POLE_LIGHTS.length; i++){
+      arduino.digitalWrite(PINS_POLE_LIGHTS[i],0);
     }
-    arduino.digitalWrite(PIN_POLL_LIGHT_RED, 1);
+    arduino.digitalWrite(PIN_POLE_LIGHT_RED, 1);
   };
 
   this.setStage = function(count){
-    for(let i=0; i<PINS_POLL_LIGHTS.length; i++){
-      arduino.digitalWrite(PINS_POLL_LIGHTS[i], cArr[count][i]);
+    for(let i=0; i<PINS_POLE_LIGHTS.length; i++){
+      arduino.digitalWrite(PINS_POLE_LIGHTS[i], cArr[count][i]);
     }
   };
 
   this.blink = function () {
     cCount = 1;
     cInt = setInterval(()=>{
-      for(let i=1; i<PINS_POLL_LIGHTS.length; i++){
-        arduino.digitalWrite(PINS_POLL_LIGHTS[i], ((cCount)?1:0));
+      for(let i=1; i<PINS_POLE_LIGHTS.length; i++){
+        arduino.digitalWrite(PINS_POLE_LIGHTS[i], ((cCount)?1:0));
       }
       cCount=!cCount;
     },250);
@@ -339,6 +285,14 @@ window.save = (dir, saveOther) => {
   }, cfg.fileSaveDelay);
 };
 
+var startCageSoundSequence = () => {
+  console.log('Start cage audio sequence');
+  arduino.digitalWrite(PIN_BRIGHTSIGN_AUDIO, 0);
+  setTimeout(() => {
+    arduino.digitalWrite(PIN_BRIGHTSIGN_AUDIO, 1);
+  }, 100);
+}
+
 var countdown = (count) => {
   pollLight.setStage(count);
 
@@ -346,10 +300,6 @@ var countdown = (count) => {
 
   if (count > 0) {
     output.textContent = count;
-    if(count<4){
-      audio[count].currentTime = 0;
-      audio[count].play();
-    }
     setTimeout(() => { countdown(count - 1); }, 1000);
     
     if(count == 1 ) {
@@ -360,24 +310,16 @@ var countdown = (count) => {
         console.log('Folder is empty: ' + dir);
       startCameraCapture(dir);
     }
-    else if(count == 5) getReady.play();
+    else if(count == 5) startCageSoundSequence(); 
   } else {
     output.textContent = 'Recording...';
-    audio[count].currentTime = 0;
-    audio[count].play();
-    clickTrack.currentTime = 0;
-    clickTrack.play();
     pollLight.blink();
     console.log('start capture');
 
     setTimeout(function() {
-      exitTrack.play();
       output.textContent = 'Done Recording';
       pollLight.stopBlink();
       pollLight.setRed();
-      console.log('done capturing');
-      // var dir = './app/sequences/temp' + dirNum++;
-      // var dir = clientRoot + VISITOR_DIR + 'temp' + dirNum++;
       var savedDir = clientRoot + VISITOR_DIR + 'temp' + dirNum++ + '\\';
       console.log('visitor save dir: ' + dir);
       if(dirNum>=cfg.setsToStore) dirNum = 0;
@@ -401,7 +343,6 @@ window.resetCam = function () {
 window.startCntdn = function(pin, state) {
   if ( !state && !waitForSave && !cageOccupied) {
     console.log('Starting countdown');
-    //timeoutFlag = false;
     resetIdleTimeout();
     clearTimeout(goTimeout);
     audioPracticePlaying = false;
@@ -463,10 +404,6 @@ var cageReset = ()=>{
 
 var ardTimeout = null;
 
-const PIN_START_COUNTDOWN_BTN = 2;
-const PIN_EXIT_CAGE_SENSOR = 23;
-const PIN_PRACTICE_CAGE_SENSOR = 12;
-
 var resetArduinoHeartbeat = (time)=>{
 //  if(ardTimeout) clearTimeout(ardTimeout);
 //  ardTimeout = setTimeout(()=>{
@@ -484,45 +421,6 @@ arduino.connect(function() {
     console.log('app.js - Connecting to Arduino...');
 
     setTimeout(() => {
-//        console.log('light test configure');
-//        arduino.configureDigitalOutput(PIN_GREEN_EXIT_LIGHT);
-//        arduino.configureDigitalOutput(PIN_POLL_LIGHT_RED);
-//        arduino.configureInputPullup(PIN_START_COUNTDOWN_BTN);
-//        arduino.watchPin(PIN_START_COUNTDOWN_BTN, (pin, state) => {
-//        	console.log('watch on start button', state);
-//        });
-//
-//        setTimeout(() => {
-//            console.log('light test on');
-//            arduino.digitalWrite(PIN_GREEN_EXIT_LIGHT, 1);
-//            arduino.digitalWrite(PIN_POLL_LIGHT_RED, 1);
-//
-//            setTimeout(() => {
-//                console.log('light test off');
-//                arduino.digitalWrite(PIN_GREEN_EXIT_LIGHT, 0);
-//                arduino.digitalWrite(PIN_POLL_LIGHT_RED, 0);
-//            }, 5000);
-//        }, 5000);
-
-
-  // configure pins
-  arduino.configureDigitalOutput(PIN_BRIGHTSIGN_PRACTICE);
-  arduino.configureDigitalOutput(PIN_BRIGHTSIGN_GO);
-
-  arduino.configureDigitalOutput(PIN_GREEN_EXIT_LIGHT);
-  arduino.configureDigitalOutput(PIN_RED_EXIT_LIGHT);
-  arduino.configureDigitalOutput(PIN_GREEN_PRACTICE_LIGHT);
-  arduino.configureDigitalOutput(PIN_RED_PRACTICE_LIGHT);
-
-  for (let pin of PINS_POLL_LIGHTS) {
-    arduino.configureDigitalOutput(pin);
-  }
-  arduino.configureDigitalOutput(PIN_POLL_LIGHT_GREEN);
-  arduino.configureDigitalOutput(PIN_POLL_LIGHT_RED);
-
-  arduino.configureInputPullup(PIN_START_COUNTDOWN_BTN);
-  arduino.configureInputPullup(PIN_EXIT_CAGE_SENSOR);
-  arduino.configureInputPullup(PIN_PRACTICE_CAGE_SENSOR);
 
   // original code resumes
   arduino.watchPin(PIN_START_COUNTDOWN_BTN, window.startCntdn);

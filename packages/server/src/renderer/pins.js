@@ -15,7 +15,7 @@ const pins = {
 
 	PINS_POLL_LIGHTS: [ 11, 10, 9, 8, 7 ],
 	PIN_POLL_LIGHT_GREEN: 7,
-	PIN_POLLI_LIGHT_RED: 11,
+	PIN_POLL_LIGHT_RED: 11,
 
 	PIN_START_COUNTDOWN_BTN: 2,
 	PIN_EXIT_CAGE_SENSOR: 23,
@@ -37,7 +37,7 @@ module.exports = function(arduino) {
 		arduino.configureDigitalOutput(pin);
 	}
 	arduino.configureDigitalOutput(pins.PIN_POLL_LIGHT_GREEN);
-	arduino.configureDigitalOutput(pins.PIN_POLLI_LIGHT_RED);
+	arduino.configureDigitalOutput(pins.PIN_POLL_LIGHT_RED);
 
 	arduino.configureInputPullup(pins.PIN_START_COUNTDOWN_BTN);
 	arduino.configureInputPullup(pins.PIN_EXIT_CAGE_SENSOR);
