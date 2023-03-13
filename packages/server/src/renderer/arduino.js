@@ -20,19 +20,17 @@ var serial = function() {
   _this.onMessage = () => {};
 
   _this.send = (arr) => {
-    // arr.push(124);
-      // if (_this.isOpen) ser.write(new Buffer(arr));
       
       if (_this.isOpen) {
-          console.log('sending:', arr);
+          // console.log('sending:', arr);
           ser.write(arr + '\n');
       } else {
-          console.log("WHOOPS serial was closed");
+          // console.log("Serial was closed");
       }
   };
 
   _this.open = (fxn) => {
-    console.log('arduino.js - open:');
+    // console.log('arduino.js - open:');
       SerialPort.list(function(err, ports) {
         console.log('arduino.js - open - finding Arduino...');
         var name = '';

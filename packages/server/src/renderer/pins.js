@@ -8,14 +8,14 @@ const pins = {
 	PIN_BRIGHTSIGN_PRACTICE: 21,
 	PIN_BRIGHTSIGN_GO: 20,
 
-	PIN_GREEN_EXIT_LIGHT: 3,
-	PIN_RED_EXIT_LIGHT: 4,
-	PIN_GREEN_PRACTICE_LIGHT: 5,
-	PIN_RED_PRACTICE_LIGHT: 6,
+	PIN_GREEN_EXIT_LIGHT: 3, // Also connected to bottom of start wedge
+	PIN_RED_EXIT_LIGHT: 4, // Also connected to top of start wedge
+	PIN_GREEN_PRACTICE_LIGHT: 5, // Also connected to cage entrance green light
+	PIN_RED_PRACTICE_LIGHT: 6, // Also connected to cage entrance red light
 
-	PINS_POLL_LIGHTS: [ 11, 10, 9, 8, 7 ],
-	PIN_POLL_LIGHT_GREEN: 7,
-	PIN_POLL_LIGHT_RED: 11,
+	PINS_POLE_LIGHTS: [ 11, 10, 9, 8, 7 ],
+	PIN_POLE_LIGHT_GREEN: 7,
+	PIN_POLE_LIGHT_RED: 11,
 
 	PIN_START_COUNTDOWN_BTN: 2,
 	PIN_EXIT_CAGE_SENSOR: 23,
@@ -33,7 +33,7 @@ module.exports = function(arduino) {
 	arduino.configureDigitalOutput(pins.PIN_GREEN_PRACTICE_LIGHT);
 	arduino.configureDigitalOutput(pins.PIN_RED_PRACTICE_LIGHT);
 
-	for (let pin of pins.PINS_POLL_LIGHTS) {
+	for (let pin of pins.PINS_POLE_LIGHTS) {
 		arduino.configureDigitalOutput(pin);
 	}
 	arduino.configureDigitalOutput(pins.PIN_POLL_LIGHT_GREEN);
