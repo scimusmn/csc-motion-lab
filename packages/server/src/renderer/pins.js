@@ -34,7 +34,6 @@ module.exports = function(arduino) {
 	arduino.configureDigitalOutput(pins.PIN_RED_PRACTICE_LIGHT);
 
 	for (let pin of pins.PINS_POLE_LIGHTS) {
-		console.log('Configuring pin ' + pin);
 		arduino.configureDigitalOutput(pin);
 	}
 	arduino.configureDigitalOutput(pins.PIN_POLE_LIGHT_GREEN);
