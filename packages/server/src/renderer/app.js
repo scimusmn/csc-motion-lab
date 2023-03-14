@@ -460,7 +460,7 @@ arduino.connect(function() {
     idle();
 
 
-    }, 2000);
+    }, 3000);
   
 });
 
