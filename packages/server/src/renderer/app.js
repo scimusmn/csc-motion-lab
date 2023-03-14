@@ -116,17 +116,13 @@ var startCameraCapture = function(saveDir) {
     console.log('stdout:', stdout);
   });
 
-  cameraProgram.on('exit', (code) => {
-    console.log('cameraProgram EXITED with code ' + code);
-    if (code === 0) {
-      console.log('Yay! Caught successful exit code.');
-      // TODO: notify client computers of new sequence and images
-      // TODO: remove preset timer and use a callback instead
-    }
-  });
-
   cameraProgram.on('close', (code) => {
     console.log('cameraProgram CLOSED with code ' + code);
+    if (code === 0) {
+      broadcastSave(savedDir);
+    } else {
+      console.log('cameraProgram FAILED with code ' + code);
+    }
   });
 
 };
@@ -194,7 +190,6 @@ var redEntranceLight = (state) => {
 var pollLight = new function(){
   var cInt = null;
 
-  // var pole = [7,8,9,10,15];
   var cArr = [[0,1,1,1,1],
               [0,0,1,1,1],
               [0,0,0,1,1],
@@ -258,32 +253,35 @@ var deleteFolderRecursive = function(path) {
   }
 };
 
-window.save = (dir, saveOther) => {
+var broadcastSave = (dir, saveOther) => {
+  console.log('§§§§§§§§ broadcastSave §§§§§§§§');
   console.log('window.save saving to ' + dir, saveOther);
 
-  // We delete the folder here, and recreate it as an empty folder.
-  // The camera script will not work unless the folder is already empty.
-  // if (fs.existsSync(dir)) deleteFolderRecursive(dir);
-  // fs.mkdirSync(dir);
-  // console.log('Folder is empty: ' + dir);
-
   output.textContent = 'Saving...';
-  
-  setTimeout(() => {
-    console.log("Images should be saved by now. Sending out broadcast to clients...");
-    output.textContent = 'Done Saving.';
 
-    //force folder to update it's modification time.
-    fs.utimesSync(dir, new Date(), new Date());
+  console.log("Images should be saved by now. Sending out broadcast to clients...");
+  output.textContent = 'Done Saving.';
 
-    const seqPath = dir.split('\\client')[1];
-    console.log('seqPath: ' + seqPath);
-    if (wss&&!saveOther) wss.broadcast('seq=' + seqPath);
-    console.log('saved to ' + dir);
-    waitForSave = false;
+  //force folder to update it's modification time.
+  fs.utimesSync(dir, new Date(), new Date());
+
+  const seqPath = dir.split('\\client')[1];
+  console.log('seqPath: ' + seqPath);
+  if (wss&&!saveOther) wss.broadcast('seq=' + seqPath);
+  console.log('saved to ' + dir);
+  waitForSave = false;
     
-  }, cfg.fileSaveDelay);
 };
+
+// window.save = (dir, saveOther) => {
+//   console.log('window.save saving to ' + dir, saveOther);
+
+//   output.textContent = 'Saving...';
+  
+//   setTimeout(() => {
+//     broadcastSave();
+//   }, cfg.fileSaveDelay);
+// };
 
 var startCageSoundSequence = () => {
   console.log('Start cage audio sequence');
@@ -331,7 +329,7 @@ var countdown = (count) => {
       clearInterval(redInt);
         redExitLight(0);
         
-      save(savedDir);
+      // save(savedDir);
     }, cfg.recordTime);
   }
 };
@@ -460,7 +458,7 @@ arduino.connect(function() {
     idle();
 
 
-    }, 3000);
+    }, 2000);
   
 });
 
