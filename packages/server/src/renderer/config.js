@@ -5,5 +5,5 @@ exports.config = {
   cameraGain: 7,
   setsToStore: 16,
   pathToCamera: '../camera/out/build/x64-Release/camera-capture.exe',
-  logArduino: true,
+  logArduino: false,
 };
