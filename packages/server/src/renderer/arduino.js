@@ -131,9 +131,6 @@ var Arduino = function() {
     };
 
   this.digitalWrite = function(pin, state) {
-    // if (!_this.isOpen) return;
-   // if (pin <= 15) sp.send([START + DIGI_WRITE + ((pin & 15) << 1) + (state & 1)]);
-    //  else log('Pin must be less than or equal to 15');
       log('digitalWrite ' + pin + " " + state);
       if (state === 0) {
           sp.send('{write-low:' + pin + '}');
