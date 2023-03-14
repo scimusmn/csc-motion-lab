@@ -2,11 +2,19 @@
 
 "use strict";
 
+
 // var com = require('serialport');
 const SerialPort = require('serialport');
 const Parser = require('./SmmParser.js');
+const config = require('./config.js').config;
 
-console.log('SerialPort imported:');
+function log(msg) {
+  if (config.logArduino) {
+  	console.log(msg);
+  }
+}
+
+log('SerialPort imported:');
 console.dir(SerialPort);
 
 var serial = function() {
@@ -22,17 +30,17 @@ var serial = function() {
   _this.send = (arr) => {
       
       if (_this.isOpen) {
-          // console.log('sending:', arr);
+          // log('sending:', arr);
           ser.write(arr + '\n');
       } else {
-          // console.log("Serial was closed");
+          // log("Serial was closed");
       }
   };
 
   _this.open = (fxn) => {
-    // console.log('arduino.js - open:');
+    // log('arduino.js - open:');
       SerialPort.list(function(err, ports) {
-        console.log('arduino.js - open - finding Arduino...');
+        log('arduino.js - open - finding Arduino...');
         var name = '';
         ports.forEach(function(port) {
           // Auto-detect via manufacturer name here instead of 
@@ -40,14 +48,14 @@ var serial = function() {
           /// e.g., manufacturer: "Arduino (www.arduino.cc)", 
           var man = port.manufacturer;
           if (man && man.toLowerCase().indexOf('arduino') > -1) {
-            console.log("Arduino found!");
-            console.log(port);
+            log("Arduino found!");
+            log(port);
             name = port.comName;
             _this.openByName(name, fxn);
           }
         });
         if (name === '') {
-          console.log('[WARNING] Arduino was not found on any of the following ports:');
+          log('[WARNING] Arduino was not found on any of the following ports:');
           console.dir(ports);
         }
       });
@@ -55,7 +63,7 @@ var serial = function() {
 
   _this.openByName = (portName, fxn) => {
     if (fxn) _this.onMessage = fxn;
-    console.log('Opening serialport ' + portName);
+    log('Opening serialport ' + portName);
 
     // Updated to work with latest serialport - tn, 2023
     ser = new SerialPort(portName, {
@@ -66,11 +74,11 @@ var serial = function() {
 
     ser.on('open', function() {
         _this.isOpen = true;
-        console.log('serial successfully opened');
+        log('serial successfully opened');
         _this.onConnect();
       _this.parser.on('data', function(data) {
         const { key, value } = data;
-        console.log(data);
+        log(data);
         if (key !== null) {
           _this.onMessage(key, value);
         }
@@ -79,8 +87,8 @@ var serial = function() {
     });
 
     ser.on('error', function(err) {
-      console.log('Error from SerialPort');
-      console.log(err);
+      log('Error from SerialPort');
+      log(err);
       sp = null;
     });
   };
@@ -108,7 +116,7 @@ var Arduino = function() {
 
     this.configureDigitalOutput = function (pin) {
         const configureMsg = '{configure-output:' + pin + '}';
-        console.log('configureMsg - ', configureMsg);
+        log('configureMsg - ' + configureMsg);
         sp.send(configureMsg);
     };
 
@@ -125,8 +133,8 @@ var Arduino = function() {
   this.digitalWrite = function(pin, state) {
     // if (!_this.isOpen) return;
    // if (pin <= 15) sp.send([START + DIGI_WRITE + ((pin & 15) << 1) + (state & 1)]);
-    //  else console.log('Pin must be less than or equal to 15');
-      console.log('digitalWrite', pin, state);
+    //  else log('Pin must be less than or equal to 15');
+      log('digitalWrite ' + pin + " " + state);
       if (state === 0) {
           sp.send('{write-low:' + pin + '}');
       } else {
@@ -147,7 +155,7 @@ var Arduino = function() {
   };
 
   this.watchPin = function(pin, handler) {
-      console.log('set up watch on pin ' + pin);
+      log('set up watch on pin ' + pin);
       this.watchers[pin] = handler;
       sp.send('{watch-pin:' + pin + '}');
   };
@@ -157,7 +165,7 @@ var Arduino = function() {
     if (interval < 256) {
       sp.send([START + ANA_REPORT + ((pin & 7) << 1) + (interval >> 7), interval & 127]);
       this.anaHandlers[pin] = handler;
-    } else console.log('interval must be less than 512');
+    } else log('interval must be less than 512');
     };
 
     
@@ -193,7 +201,7 @@ var Arduino = function() {
   };
 
   this.connect = function(fxn) {
-    console.log("arduino.js connect");
+    log("arduino.js connect");
     exports.serial.onConnect = fxn;
     exports.serial.open((k, v) => this.onMessage(k, v));
   };
