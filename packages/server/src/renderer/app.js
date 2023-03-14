@@ -119,7 +119,7 @@ var startCameraCapture = function(saveDir) {
   cameraProgram.on('close', (code) => {
     console.log('cameraProgram CLOSED with code ' + code);
     if (code === 0) {
-      var savedDir = clientRoot + VISITOR_DIR + 'temp' + dirNum + '\\';
+      var savedDir = clientRoot + VISITOR_DIR + 'temp' + dirNum++ + '\\';
       broadcastSave(savedDir);
     } else {
       console.log('cameraProgram FAILED with code ' + code);
@@ -259,8 +259,9 @@ var deleteFolderRecursive = function(path) {
 };
 
 var broadcastSave = (dir, saveOther) => {
-  console.log('§§§§§§§§ broadcastSave §§§§§§§§');
   console.log('window.save saving to ' + dir, saveOther);
+
+  if(dirNum>=cfg.setsToStore) dirNum = 0;
 
   output.textContent = 'Saving...';
 
@@ -323,18 +324,15 @@ var countdown = (count) => {
       output.textContent = 'Done Recording';
       pollLight.stopBlink();
       pollLight.setRed();
-      var savedDir = clientRoot + VISITOR_DIR + 'temp' + dirNum++ + '\\';
-      console.log('visitor save dir: ' + dir);
-      if(dirNum>=cfg.setsToStore) dirNum = 0;
+      
       greenExitLight(1);
       blinkInt = setInterval(()=>{
         blinkBool = !blinkBool;
         greenExitLight((blinkBool)?1:0);
       },500)
       clearInterval(redInt);
-        redExitLight(0);
+      redExitLight(0);
         
-      // save(savedDir);
     }, cfg.recordTime);
   }
 };
@@ -367,7 +365,7 @@ var saveBut = document.querySelector('#save');
 
 saveBut.onclick = (e)=>{
   console.log("saveBut.onclick");
-  save(document.querySelector('#folder').value,true);
+  broadcastSave(document.querySelector('#folder').value,true);
 }
 
 startBut.onclick = ()=>{
