@@ -119,10 +119,15 @@ var startCameraCapture = function(saveDir) {
   cameraProgram.on('close', (code) => {
     console.log('cameraProgram CLOSED with code ' + code);
     if (code === 0) {
+      var savedDir = clientRoot + VISITOR_DIR + 'temp' + dirNum + '\\';
       broadcastSave(savedDir);
     } else {
       console.log('cameraProgram FAILED with code ' + code);
     }
+  });
+
+  cameraProgram.on('exit', (code) => {
+    console.log('cameraProgram EXITED with code ' + code);
   });
 
 };
