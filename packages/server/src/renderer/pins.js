@@ -25,6 +25,7 @@ const pins = {
 function configurePins(arduino) {
 	console.log('configurePins');
 	arduino.configureDigitalOutput(pins.PIN_BRIGHTSIGN_AUDIO);
+	arduino.digitalWrite(pins.PIN_BRIGHTSIGN_AUDIO, 1);
 	arduino.configureDigitalOutput(pins.PIN_BRIGHTSIGN_PRACTICE);
 	arduino.configureDigitalOutput(pins.PIN_BRIGHTSIGN_GO);
 
