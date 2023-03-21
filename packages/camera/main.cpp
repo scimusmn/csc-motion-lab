@@ -14,6 +14,7 @@ using namespace VWSDK;
 using namespace std::chrono_literals;
 
 
+// constant settings
 #define IMAGE_WIDTH  640
 #define IMAGE_HEIGHT 480
 #define FRAME_COUNT 800
@@ -61,6 +62,8 @@ int run(int argc, char **argv, bool is_retry) {
 		fprintf(stderr, "[FATAL] Mus specify gain and file prefix!\n");
 		return 1;
 	}
+
+	// configure the global parameters
 	frame_count = 0;
 	char* gain = argv[1];
 	prefix = argv[2];
@@ -104,13 +107,10 @@ int run(int argc, char **argv, bool is_retry) {
 	// configure camera
 	result = CameraSetPixelFormat(camera, PIXEL_FORMAT_RGB8);
 	CHECK_ERROR(result, "set camera pixel format");
-
 	result = CameraSetCustomCommand(camera, "Gain", gain, true);
 	CHECK_ERROR(result, "set camera gain");
-
 	result = CameraSetWidth(camera, IMAGE_WIDTH);
 	CHECK_ERROR(result, "set camera image width");
-
 	result = CameraSetHeight(camera, IMAGE_HEIGHT);
 	CHECK_ERROR(result, "set camera image height");
 
@@ -125,18 +125,23 @@ int run(int argc, char **argv, bool is_retry) {
 	if (frame_count < 50) {
 		// some sort of communication error has occurred
 		if (!is_retry) {
+			// the camera ALWAYS fails to capture images the first time after it boots up for some reason
+			// so we will try again one more time
 			RELEASE_RESOURCES;
 			write_pool.clear_queue();
 			fprintf(stderr, "Communication error detected; retrying...\n");
 			return run(argc, argv, true);
 		}
 		else {
+			// we've tried again and it still isn't working...
 			fprintf(stderr, "[FATAL] Communication error persists!\n");
 			RELEASE_RESOURCES;
 			write_pool.stop(false);
 			return 1;
 		}
 	}
+
+	// wait for all [FRAME_COUNT] images to arrive
 	while (frame_count < FRAME_COUNT) {}
 	RELEASE_RESOURCES; // release camera & gigE driver
 
@@ -157,6 +162,7 @@ struct Image {
 	unsigned int w, h;
 	unsigned char *data;
 
+	// convert from VIS SDK image struct to this format
 	void ConvertInfo(IMAGE_INFO *info) {
 		w = info->width;
 		h = info->height;
@@ -166,6 +172,7 @@ struct Image {
 };
 
 
+// copy pixels from one (x, y) point to another in a different array
 void copy_px(struct Image *img, unsigned char *dst, int x0, int y0, int x1, int y1)
 {
 	int w = img->w;
@@ -174,16 +181,18 @@ void copy_px(struct Image *img, unsigned char *dst, int x0, int y0, int x1, int 
 	unsigned long source_index = 3*((w*y0) + x0);
 	unsigned long dest_index = 3*((h*y1) + x1);
 
-	//printf("[%d] %d <- %d\n", img->index, dest_index, source_index);
 	for (int i=0; i<3; i++) {
 		dst[dest_index+i] = img->data[source_index+i];
 	}
 }
 
 
+// rotate an image
 void rotate_ccw(struct Image *img) {
+	// create the destination array
 	unsigned char *dest = (unsigned char *) malloc(img->w * img->h * 3 * sizeof(unsigned char));
 
+	// copy the image data, rotated 90 degrees
 	for (unsigned int x=0; x<img->w; x++) {
 		for (unsigned int y=0; y<img->h; y++) {
 			int x0 = x;
@@ -194,8 +203,11 @@ void rotate_ccw(struct Image *img) {
 		}
 	}
 
+	// reassign the array
 	free(img->data);
 	img->data = dest;
+
+	// swap the width and height
 	unsigned int w = img->w;
 	img->w = img->h;
 	img->h = w;
