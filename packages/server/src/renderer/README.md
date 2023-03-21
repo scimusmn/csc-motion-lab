@@ -13,3 +13,6 @@ files
 * `pins.js` - contains pin number definitions and a function to configure them on the arduino
 * `README.md` - it's me!! c:
 * `style.css` - the style for `index.html`
+
+
+[serialport.js parser]: https://serialport.io/docs/api-parsers-overview
