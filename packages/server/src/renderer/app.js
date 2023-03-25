@@ -435,7 +435,7 @@ arduino.connect(function() {
   });
 
   arduino.watchPin(PIN_PRACTICE_CAGE_SENSOR, function(pin, state) {
-    if (!state) {
+    if (state) {
       console.log('practice cage occupied');
       if(!audioPracticePlaying){
         if(timeoutFlag){
