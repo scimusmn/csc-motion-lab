@@ -1,0 +1,23 @@
+flowchart LR
+	S{Server 192.168.0.1} -.USB.- A{{Arduino}}
+	subgraph Electronics
+	direction TB
+		A --- BAudio[Audio Brightsign]
+		BAudio --- Speakers
+		A --- BPractice[Practice Cage Brightsign]
+		A --- PIR[Practice Cage Sensor]
+		A --- Button[Recording Button]
+		A --- LightsB[Recording Button Lights]
+		A --- LightsS[Stoplights x3]
+		A --- LightsR[Recording Lights x2]
+	end
+	BPractice -.HDMI.- TV
+	S ==cat5=== sw1((Box Switch))
+	subgraph Network
+		direction TB
+		sw1 === POE{{PoE Injector}} === Cam(Camera 192.168.0.2)
+		sw1 === sw2((Client Switch))
+		sw2 === c1(Client 1 192.168.0.11)
+		sw2 === c2(Client 2 192.168.0.12)
+		sw2 === c3(Client 3 192.168.0.13)
+	end

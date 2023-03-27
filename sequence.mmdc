@@ -1,0 +1,30 @@
+sequenceDiagram
+	autonumber
+	participant Server
+	participant Arduino
+	participant PracticeBrightsign
+	participant AudioBrightsign
+	participant CameraProgram
+	participant Camera
+	participant Clients
+	Note left of Server: Booting up...
+	Server->>Arduino: Configure all pins
+	Note left of Server: Waiting for a user to arrive...
+	Arduino->>Server: Someone is in the practice cage
+	Server->>Server: Wait 25 seconds
+	Server->>PracticeBrightsign: Display second video
+	Server->>Arduino: Show green lights into recording cage
+	Note left of Server: User walks into cage...	
+	Arduino->>Server: User has pressed record button
+	Server->>AudioBrightsign: Play recording audio
+	Server->>PracticeBrightsign: Display original video
+	Server->>Server: Wait 4 seconds
+	Server->>CameraProgram: Capture camera frames to disk
+	loop Capturing
+		CameraProgram->>Camera: Grab frame
+		Camera->>CameraProgram: Here is a frame
+	end
+	CameraProgram->>Server: Capturing complete
+	Server->>Arduino: Show green lights out of recording cage
+	Server->>Clients: New recording is available
+
