@@ -18,6 +18,3 @@
 - `yarn dev`
 - After Stele opens displaying admin interface, open a Google Chrome (v78) browser and navigate to `http://localhost/` 
 
-## TODO
-- Document how to swap in new athlete image sequences
-- Document how to swap in new athlete text (https://d.pr/i/EPuWiL)
